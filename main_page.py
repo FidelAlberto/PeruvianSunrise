@@ -137,23 +137,23 @@ left, right = st.columns(2)
 
 left.write("Llena los datos")
 form = left.form("template_form")
-student = form.multiselect("Actividades",["Willkommen in Lima","Freier Tag in Cus","Ankunft in Arequipa und Freier Tag in Arequip","Von den Anden in den Dschunge"],default="Willkommen in Lima")
+student = form.multiselect("Actividades",["Willkommen in Lima","Freier Tag in Cus","Ankunft in Arequipa und Freier Tag in Arequip","Von den Anden in den Dschunge",
+                                          "Freier Morgen in Ica und Fahrt nach Naz"],default="Willkommen in Lima")
 cantidad = len(student)
-if cantidad == 1:
+
+
+if cantidad > 0:
     a=student[0]
-if cantidad == 2:
-    a=student[0]
-    b=student[1]
-if cantidad == 3:
-    a=student[0]
-    b=student[1]
-    c=student[2]
-if cantidad == 4:
-    a=student[0]
-    b=student[1]
-    c=student[2]
-    d=student[3]
-price = form.number_input("Precio",2000,5000)
+    if cantidad > 1:
+        b=student[1]
+        if cantidad > 2:
+            c=student[2]
+            if cantidad > 3:
+                d=student[3]
+                if cantidad > 4:
+                    e=student[4]
+                        
+price = form.number_input("Precio",2000,50000)
 submit = form.form_submit_button("Generar")
 
 
@@ -161,7 +161,8 @@ submit = form.form_submit_button("Generar")
 imagenes ={ "Willkommen in Lima": ["https://www.hajosiewer.de/wp-content/uploads/Paraglider-an-der-K%C3%BCste-von-Lima.jpg","https://d26gc54f207k5x.cloudfront.net/media/public/cache/800x800/2019/02/14/peru-lima-plaza.jpeg","https://d13d0f5of5vzfo.cloudfront.net/images/products/8a0092ff7b3ad211017b720ac8694fab/large_AdobeStock_107539601_lindrik_online_800x600.jpg"],
            "Freier Tag in Cus":["https://www.perurail.com/wp-content/uploads/2020/11/Machu-Picchu-la-Ciudadela-Inca.jpg","https://turismoi.pe/uploads/city/image/20775/large_cusco.jpg","https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZn0aeL4sYldq2gH0mA7Q_Rn_xVdy23YQRJw&usqp=CAU"],
            "Ankunft in Arequipa und Freier Tag in Arequip":["https://perumin.com/perumin34/assets/uploads/images/4135c-foto-arequipa.jpg","https://thumbs.dreamstime.com/b/stratovolcano-el-misti-arequipa-per%C3%BA-40716272.jpg","https://bananomeridiano.com/wp-content/uploads/2019/06/que-ver-en-arequipa-plaza-de-armas.jpg"],
-           "Von den Anden in den Dschunge":["https://cdn.getyourguide.com/img/location/5df35b210202a.jpeg/70.jpg","https://lp-cms-production.imgix.net/2021-04/shutterstockRF_1021961164.jpg","https://www.sandovallake.com/wp-content/uploads/2019/06/canopy-tours-sandoval-lake-reserve-2.jpg"]}
+           "Von den Anden in den Dschunge":["https://cdn.getyourguide.com/img/location/5df35b210202a.jpeg/70.jpg","https://lp-cms-production.imgix.net/2021-04/shutterstockRF_1021961164.jpg","https://www.sandovallake.com/wp-content/uploads/2019/06/canopy-tours-sandoval-lake-reserve-2.jpg"],
+           "Freier Morgen in Ica und Fahrt nach Naz":["https://turismoi.pe/uploads/photo/photo_file/29473/optimized_1195__5_.jpg","https://viajesica.com/wp-content/uploads/2019/02/nascafoto1.jpg","https://media.tacdn.com/media/attractions-splice-spp-674x446/0a/93/05/49.jpg"]}
 
 
 env = Environment(loader=FileSystemLoader("."), autoescape=select_autoescape())
@@ -232,6 +233,34 @@ if submit:
             imag_1d = imagenes[d][0],
             imag_2d = imagenes[d][1],
             imag_3d = imagenes[d][2],
+            # grade=f"{grade} soles",#grade=f"{grade}/100",
+            date=date.today().strftime("%B %d, %Y"),
+            price=f"The total price is {price} USD"
+        )
+    if cantidad == 5:
+        template = env.get_template("sample_5.html")
+        html = template.render(
+            student=student,
+            a=a,
+            imag_1a = imagenes[a][0],
+            imag_2a = imagenes[a][1],
+            imag_3a = imagenes[a][2],
+            b=b,
+            imag_1b = imagenes[b][0],
+            imag_2b = imagenes[b][1],
+            imag_3b = imagenes[b][2],
+            c=c,
+            imag_1c = imagenes[c][0],
+            imag_2c = imagenes[c][1],
+            imag_3c = imagenes[c][2],
+            d = d,
+            imag_1d = imagenes[d][0],
+            imag_2d = imagenes[d][1],
+            imag_3d = imagenes[d][2],
+            e = e,
+            imag_1e = imagenes[e][0],
+            imag_2e = imagenes[e][1],
+            imag_3e = imagenes[e][2],
             # grade=f"{grade} soles",#grade=f"{grade}/100",
             date=date.today().strftime("%B %d, %Y"),
             price=f"The total price is {price} USD"
