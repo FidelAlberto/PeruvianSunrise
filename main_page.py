@@ -243,8 +243,11 @@ if submit:
     # 1 row  to put the app in cloud ----------------------
     
     #Point pdfkit configuration to wkhtmltopdf.exe
-    config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
-    pdf = pdfkit.from_string(html, False, configuration=config, css='sample.css')
+    # config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
+    # pdf = pdfkit.from_string(html, False, configuration=config, css='sample.css')
+    
+    pdf = pdfkit.from_string(html, False, css='sample.css')
+    
     #Convert HTML file to PDF
     # pdf = pdfkit.from_file(path_to_file, output_path='peruvian.pdf', configuration=config, css='sample.css')
 
