@@ -89,6 +89,8 @@ html, body{
 
 
 
+
+
 @media only screen and (max-width: 600px) {
     .heading {
         font-size: 4em;
@@ -97,46 +99,12 @@ html, body{
 
 /* put description and images to activities */
 
-
-img {
-	max-width: 100%;
+.text-center {
+  text-align: center;
 }
-
-.image-left,
-.image-right {
-	margin: 1em 0;
+.text-justify {
+  text-align: justify;
 }
-
-@media (min-width: 20em) {
-	.image-left,
-	.image-right {
-		display: flex;
-		align-items: center;
-	}
-
-	.image-left img {
-		margin-right: 1em;
-		float: left; /* fallback */
-	}
-
-	.image-right img {
-		order: 1;
-		margin-left: 1em;
-		float: right; /* fallback */
-	}
-
-	/* clearfix for fallback */
-	.image-left::after,
-	.image-right::after {
-		content: "";
-		display: block;
-		clear: both;
-	}
-}
-
-@media (min-width: 30em) {
-	.image-left img,
-	.image-right img {
-		flex-shrink: 0;
-	}
+.content {
+  margin: 2px 0px 0px 1px;
 }
