@@ -60,7 +60,7 @@ st.markdown(hide_menu , unsafe_allow_html=True)
 # Initialize the bars and menus
 with st.sidebar:
     menu_sidebar = option_menu("Program", ['Create new', "Templates", "Save this program"],
-        icons=['house', 'gear'], menu_icon="cast", default_index=0)
+        icons=['house', 'folder','save'], menu_icon="cast", default_index=0)
     
 menu = option_menu(None, ["Itinerary","Activities & Transportation","Accommodations","Pricing"], 
     icons=['calendar', 'binoculars', "tag", 'credit-card'], 
@@ -168,13 +168,23 @@ if menu_sidebar == "Create new":
         # response = AgGrid(df_template, editable=True, fit_columns_on_grid_load=True)
         st.form_submit_button("Save")
 
+    
 
 
     # st.write(response['data']) 
     df= pd.DataFrame(response['data'])
     # limpiar de valores vacios
     df = df[df['Lugar'].astype(bool)]
-    # st.sidebar.table(df)
+    
+    
+    
+    st.sidebar.caption("Developed by [**Fidel Ramos**](https://vittaquant-ai.com)")
+    st.sidebar.caption("**VittaQuant Techonologies**")
+    st.sidebar.markdown('##')  
+
+        
+        # You can call any Streamlit command, including custom components:
+        
 
 
 
@@ -399,9 +409,11 @@ if menu_sidebar == "Create new":
                        "Transfer Aeropuerto - Ica":[0,31,62,93,124,155]
               }
 
+    # The most tiny image in blank.png is 1x1 pixels
+    blank_image = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
 
-
-    image = {"City Tour Lima":'https://denomades.s3.us-west-2.amazonaws.com/blog/wp-content/uploads/2020/08/30162219/lima-peru-shutterstock_1047718252.jpg',
+    image = {0:"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+            "City Tour Lima":'https://denomades.s3.us-west-2.amazonaws.com/blog/wp-content/uploads/2020/08/30162219/lima-peru-shutterstock_1047718252.jpg',
             "City Tour Cusco":"https://cms.valenciatravelcusco.com/media/images/package/city-tour-cusco_wmMCcD1.jpg",
             "Tour Valle Sagrado":"https://d3tf9yuhsp2bpn.cloudfront.net/tour_valle_sagrado_de_los_incas_tu_experiencia_120190627120604.jpg",
             "City Tour Arequipa":"https://www.inkasdestination.com/wp-content/uploads/2020/04/arequipa-misti.jpg",
@@ -412,9 +424,38 @@ if menu_sidebar == "Create new":
             "Tour Colca":"https://perumistikatravel.com/wp-content/uploads/2015/10/valle-colca.jpg",
             "Tour Tambopata":"https://www.raptravel.org/imagenes/tour-tambopata-peru-2dias.jpg",
             "Transfer Aeropuerto - Ica":"https://live.staticflickr.com/850/42981524855_db834f169f_b.jpg"}
+    
+    
+    
+    # "" is the better way to create a blank string in html
+    textos = {0:"  ",
+            "City Tour Lima":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "City Tour Cusco":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Tour Valle Sagrado":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "City Tour Arequipa":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "City Tour Puerto Maldonado":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "City Tour Ica":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Transfer Aeropuerto - Cusco":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Transfer Aeropuerto - Lima":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Tour Colca":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Tour Tambopata":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas).",
+            "Transfer Aeropuerto - Ica":"La ciudad del Cusco fue el centro urbano más importante del Imperio del Tahuantinsuyo, fundada por el Inca Manco Cápac, y conformaba de palacios, templos ycanchas (viviendas)."}
 
 
+    titulos = {0:"",
+            "City Tour Lima":"City Tour Lima",
+            "City Tour Cusco":"City Tour Cusco",
+            "Tour Valle Sagrado":"Tour Valle Sagrado",
+            "City Tour Arequipa":"City Tour Arequipa",
+            "City Tour Puerto Maldonado":"City Tour Puerto Maldonado",
+            "City Tour Ica":"City Tour Ica",
+            "Transfer Aeropuerto - Cusco":"Transfer Aeropuerto - Cusco",
+            "Transfer Aeropuerto - Lima":"Transfer Aeropuerto - Lima",
+            "Tour Colca":"Tour Colca",
+            "Tour Tambopata":"Tour Tambopata",
+            "Transfer Aeropuerto - Ica":"Transfer Aeropuerto - Ica"}
 
+    
 
     # Actualización de la varibla values total
     values_total = len(final)
@@ -422,7 +463,13 @@ if menu_sidebar == "Create new":
     # crear los items para elegir las actividades y transportes
     # se han cargado valores para 7 dias de programa como máximo
     col1,col2 =st.columns([1,2])
-
+    act_1 =[]
+    act_2 = []
+    act_3 = []
+    act_4 = []
+    act_5 = []
+    act_6 = []
+    
     if values_total >=1:
         col1.header("Day 1")
         
@@ -599,17 +646,32 @@ if menu_sidebar == "Create new":
     
     
     st.title("Pricing")
-        
+    # 
+    
+    
+    # obtener una lista de los destinos seleccionados [['tour', 'city', 0, 0, 0], ['cusco', 'tour', 0, 0, 0], [0, 0, 0, 0, 0]]
+    dias_totales=[act_1,act_2,act_3,act_4,act_5,act_6]
+    
+    new=[]
+    for a in dias_totales:
+        a = a + [0]*(4 - len(a))
+        new.append(a)
+    
+    # calcular el precio total
+    precio_total = 0
+    union_de_precios=act_1+act_2+act_3+act_4+act_5+act_6
+    for x in union_de_precios:
+        precio_total += precios_adultos[x][st.session_state.adultos] + int((precios_niños[x][st.session_state.niños])//2.5)
+    
+    
     # obtener las ciudades seleccionadas  unicas
     ciudades = set(df["Lugar"])
     ciudades = list(ciudades)
     # st.write(ciudades)
     
-    
     left, right = st.columns(2)
-
-    left.write("Llena los datos")
-    form = left.form("template_form")
+    
+    # form = left.form("template_form")
     student = ciudades
     cantidad = len(student)
 
@@ -624,10 +686,14 @@ if menu_sidebar == "Create new":
                     d=student[3]
                     if cantidad > 4:
                         e=student[4]
-                            
-    price = form.number_input("Precio",2000,50000)
-    markup = form.slider("Markup",0,100,20)
-    submit = form.form_submit_button("Generar")
+    
+    
+    price = left.write(f"**The  price is  {precio_total} USD**")
+    markup = left.slider("Markup",0,100,20,key = "markup")
+    precio_final = round(precio_total + (precio_total*markup)/100,2)
+    price_final = left.write(f"**The profit is  {round(precio_final-precio_total,2)} USD**")
+    price_final = left.write(f"**The final price is  {precio_final} USD**")
+    # submit = form.form_submit_button("Generar")
 
 
 
@@ -637,10 +703,11 @@ if menu_sidebar == "Create new":
             "Madre de Dios":["https://cdn.getyourguide.com/img/location/5df35b210202a.jpeg/70.jpg","https://lp-cms-production.imgix.net/2021-04/shutterstockRF_1021961164.jpg","https://www.sandovallake.com/wp-content/uploads/2019/06/canopy-tours-sandoval-lake-reserve-2.jpg"],
             "Ica":["https://turismoi.pe/uploads/photo/photo_file/29473/optimized_1195__5_.jpg","https://viajesica.com/wp-content/uploads/2019/02/nascafoto1.jpg","https://media.tacdn.com/media/attractions-splice-spp-674x446/0a/93/05/49.jpg"]}
 
-
+    
+    
     env = Environment(loader=FileSystemLoader("."), autoescape=select_autoescape())
 
-    if submit:
+    if st.button("Generar"):
         if cantidad == 1:
             template = env.get_template("templates/sample_1.html")
             html = template.render(
@@ -649,10 +716,84 @@ if menu_sidebar == "Create new":
                 imag_1a = imagenes[a][0],
                 imag_2a = imagenes[a][1],
                 imag_3a = imagenes[a][2],
+                activ_1a = image[new[0][0]],
+                activ_2a = image[new[0][1]],
+                activ_3a = image[new[0][2]],
+                activ_4a = image[new[0][3]],
+                activ_5a = image[new[1][0]],
+                activ_6a = image[new[1][1]],
+                activ_7a = image[new[1][2]],
+                activ_8a = image[new[1][3]],
+                activ_9a = image[new[2][0]],
+                activ_10a = image[new[2][1]],
+                activ_11a = image[new[2][2]],
+                activ_12a = image[new[2][3]],
+                activ_13a = image[new[3][0]],
+                activ_14a = image[new[3][1]],
+                activ_15a = image[new[3][2]],
+                activ_16a = image[new[3][3]],
+                activ_17a = image[new[4][0]],
+                activ_18a = image[new[4][1]],
+                activ_19a = image[new[4][2]],
+                activ_20a = image[new[4][3]],
+                activ_21a = image[new[5][0]],
+                activ_22a = image[new[5][1]],
+                activ_23a = image[new[5][2]],
+                activ_24a = image[new[5][3]],
+                parrafo_1a = textos[new[0][0]],
+                parrafo_2a = textos[new[0][1]],
+                parrafo_3a = textos[new[0][2]],
+                parrafo_4a = textos[new[0][3]],
+                parrafo_5a = textos[new[1][0]],
+                parrafo_6a = textos[new[1][1]],
+                parrafo_7a = textos[new[1][2]],
+                parrafo_8a = textos[new[1][3]],
+                parrafo_9a = textos[new[2][0]],
+                parrafo_10a = textos[new[2][1]],
+                parrafo_11a = textos[new[2][2]],
+                parrafo_12a = textos[new[2][3]],
+                parrafo_13a = textos[new[3][0]],
+                parrafo_14a = textos[new[3][1]],
+                parrafo_15a = textos[new[3][2]],
+                parrafo_16a = textos[new[3][3]],
+                parrafo_17a = textos[new[4][0]],
+                parrafo_18a = textos[new[4][1]],
+                parrafo_19a = textos[new[4][2]],
+                parrafo_20a = textos[new[4][3]],
+                parrafo_21a = textos[new[5][0]],
+                parrafo_22a = textos[new[5][1]],
+                parrafo_23a = textos[new[5][2]],
+                parrafo_24a = textos[new[5][3]],
+                titulo_1a = titulos[new[0][0]],
+                titulo_2a = titulos[new[0][1]],
+                titulo_3a = titulos[new[0][2]],
+                titulo_4a = titulos[new[0][3]],
+                titulo_5a = titulos[new[1][0]],
+                titulo_6a = titulos[new[1][1]],
+                titulo_7a = titulos[new[1][2]],
+                titulo_8a = titulos[new[1][3]],
+                titulo_9a = titulos[new[2][0]],
+                titulo_10a = titulos[new[2][1]],
+                titulo_11a = titulos[new[2][2]],
+                titulo_12a = titulos[new[2][3]],
+                titulo_13a = titulos[new[3][0]],
+                titulo_14a = titulos[new[3][1]],
+                titulo_15a = titulos[new[3][2]],
+                titulo_16a = titulos[new[3][3]],
+                titulo_17a = titulos[new[4][0]],
+                titulo_18a = titulos[new[4][1]],
+                titulo_19a = titulos[new[4][2]],
+                titulo_20a = titulos[new[4][3]],
+                titulo_21a = titulos[new[5][0]],
+                titulo_22a = titulos[new[5][1]],
+                titulo_23a = titulos[new[5][2]],
+                titulo_24a = titulos[new[5][3]],
+                
                 date=date.today().strftime("%B %d, %Y"),
-                price=f"The total price is {price} USD"
+                price=f"The total price is {precio_final} USD"
             )
         if cantidad == 2:
+            
             template = env.get_template("templates/sample_2.html")
             html = template.render(
                 student=student,
@@ -664,6 +805,9 @@ if menu_sidebar == "Create new":
                 imag_1b = imagenes[b][0],
                 imag_2b = imagenes[b][1],
                 imag_3b = imagenes[b][2],
+                
+                
+                
                 date=date.today().strftime("%B %d, %Y"),
                 price=f"The total price is {price} USD"
             )
@@ -683,6 +827,8 @@ if menu_sidebar == "Create new":
                 imag_1c = imagenes[c][0],
                 imag_2c = imagenes[c][1],
                 imag_3c = imagenes[c][2],
+                
+                
                 date=date.today().strftime("%B %d, %Y"),
                 price=f"The total price is {price} USD"
             )
@@ -706,6 +852,11 @@ if menu_sidebar == "Create new":
                 imag_1d = imagenes[d][0],
                 imag_2d = imagenes[d][1],
                 imag_3d = imagenes[d][2],
+                
+                
+                
+                
+                
                 # grade=f"{grade} soles",#grade=f"{grade}/100",
                 date=date.today().strftime("%B %d, %Y"),
                 price=f"The total price is {price} USD"
@@ -734,14 +885,15 @@ if menu_sidebar == "Create new":
                 imag_1e = imagenes[e][0],
                 imag_2e = imagenes[e][1],
                 imag_3e = imagenes[e][2],
+                 
+                 
+                 
                 # grade=f"{grade} soles",#grade=f"{grade}/100",
                 date=date.today().strftime("%B %d, %Y"),
                 price=f"The total price is {price} USD"
             )
             
             
-            
-        
         # 2 rows  DELETE  to work in Windows-------------------
         # config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
         # pdf=pdfkit.from_string(html, False, configuration=config)
@@ -760,9 +912,12 @@ if menu_sidebar == "Create new":
         right.success("El programa se generó exitosamente")
         # st.write(html, unsafe_allow_html=True)
         # st.write("")
-        right.download_button(
-            "⬇️ Download PDF",
-            data=pdf,
-            file_name="recibo.pdf",
+        supremo =right.download_button(
+                "⬇️ Download PDF",
+                data=pdf,
+                file_name="Programa.pdf",
                 mime="application/octet-stream",
-        )
+                )
+        # obtener el valor de renderes de pdf  y luego  mostrarlo para descargar de forma inmediata dependiendo 
+        # del usuario
+        

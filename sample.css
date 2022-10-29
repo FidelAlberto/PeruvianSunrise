@@ -56,6 +56,8 @@ html, body{
     margin: 0 auto;
     max-width: 700px;
     padding: 1em 1em;
+    padding-bottom: 1em;
+
 }
 .sub-heading{
     font-family: 'Caveat', cursive;
@@ -64,8 +66,9 @@ html, body{
 }
 .details{
     /* margin: 0 auto 8em; */
-    margin-top: 3em;
-    margin-bottom: 3em;
+    margin-top: 2em;
+    margin-bottom: 2em;
+    
 }
 .details-heading{
     font-weight: bold;
@@ -101,10 +104,50 @@ html, body{
 
 .text-center {
   text-align: center;
+  font-family: 'Caveat', cursive;
+  font-size: 3em;
+  margin-top: 1em;
 }
+
 .text-justify {
   text-align: justify;
+  float: left;
 }
-.content {
-  margin: 2px 0px 0px 1px;
+
+/* put description and images to activities 
+
+p {
+    text-align: justify;
 }
+*/
+
+/* poner justificacion a todos los parrafos excepto a los que tengan class="evitar" */
+
+
+
+p:not(.evitar) {
+    text-align: justify;
+}
+
+
+.myclass p {
+    text-align: justify;
+    padding-right: 12em;
+}
+
+.myclass img{
+    padding-bottom: -1em;
+}
+
+.myclass h3{
+    font-weight: bold;
+    text-transform: uppercase;
+    text-align: left;
+}
+
+.texto_actividad {
+    margin: 0 auto;
+    max-width: 500px;
+    padding: 1em 1em;
+}
+
