@@ -412,7 +412,7 @@ if menu_sidebar == "Create new":
     # The most tiny image in blank.png is 1x1 pixels
     blank_image = "data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs="
 
-    image = {0:"data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=",
+    image = {0:"data:image/svg+xml;charset=utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%3E%3C/svg%3E",
             "City Tour Lima":'https://denomades.s3.us-west-2.amazonaws.com/blog/wp-content/uploads/2020/08/30162219/lima-peru-shutterstock_1047718252.jpg',
             "City Tour Cusco":"https://cms.valenciatravelcusco.com/media/images/package/city-tour-cusco_wmMCcD1.jpg",
             "Tour Valle Sagrado":"https://d3tf9yuhsp2bpn.cloudfront.net/tour_valle_sagrado_de_los_incas_tu_experiencia_120190627120604.jpg",
@@ -806,10 +806,9 @@ if menu_sidebar == "Create new":
                 imag_2b = imagenes[b][1],
                 imag_3b = imagenes[b][2],
                 
-                
-                
+            
                 date=date.today().strftime("%B %d, %Y"),
-                price=f"The total price is {price} USD"
+                price=f"The total price is {precio_final} USD"
             )
         if cantidad == 3:
             template = env.get_template("templates/sample_3.html")
@@ -830,7 +829,7 @@ if menu_sidebar == "Create new":
                 
                 
                 date=date.today().strftime("%B %d, %Y"),
-                price=f"The total price is {price} USD"
+                price=f"The total price is {precio_final} USD"
             )
         if cantidad == 4:
             template = env.get_template("templates/sample_4.html")
@@ -859,7 +858,7 @@ if menu_sidebar == "Create new":
                 
                 # grade=f"{grade} soles",#grade=f"{grade}/100",
                 date=date.today().strftime("%B %d, %Y"),
-                price=f"The total price is {price} USD"
+                price=f"The total price is {precio_final} USD"
             )
         if cantidad == 5:
             template = env.get_template("templates/sample_5.html")
@@ -890,7 +889,7 @@ if menu_sidebar == "Create new":
                  
                 # grade=f"{grade} soles",#grade=f"{grade}/100",
                 date=date.today().strftime("%B %d, %Y"),
-                price=f"The total price is {price} USD"
+                price=f"The total price is {precio_final} USD"
             )
             
             
