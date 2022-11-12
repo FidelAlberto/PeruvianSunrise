@@ -8,4 +8,6 @@ plotly-express==0.4.1
 streamlit-option-menu==0.3.2
 streamlit-aggrid==0.3.3
 boto3==1.26.3
+pymongo==4.3.2
+dnspython==2.2.1
 

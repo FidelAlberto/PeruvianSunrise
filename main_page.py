@@ -963,3 +963,23 @@ if menu_sidebar == "Edit data":
                     with st.spinner('Uploading...'):
                         # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
                         uploadimageToS3(uploaded_image,bucket_name , uploaded_image.name)
+
+    
+    if menu=="Transportation":
+        ############################
+        # Connection to MongoDB
+        ############################
+        import pymongo
+        from pymongo import MongoClient
+        import pandas as pd
+        import random
+        from time import sleep
+
+        # Conexion con Mongodb Atlas
+        cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+        # db = client.get_database("divisas")
+        db = cluster["peruviansunrise"]
+        collection = db["activities"]
+        collection.insert_one({"_id":5, "user_name":"Fidel"})
+        collection.insert_one({"_id":500, "user_name":"Ravi"})
+        st.write("MongoDB Atlas connection ok")
