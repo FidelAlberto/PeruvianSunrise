@@ -2,10 +2,13 @@
 
 Fidel Alberto Ramos Calachahuin
 VittaQuant Inc.
-Aplication 1 of example to the webpage
 Cloud Streamlit
 
 """
+
+from s3connection import uploadimageToS3
+from s3connection import get_link
+
 from genericpath import exists
 import pdfkit
 from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoader
@@ -59,20 +62,9 @@ st.markdown(hide_menu , unsafe_allow_html=True)
 # ------------------------------------------
 # Initialize the bars and menus
 with st.sidebar:
-    menu_sidebar = option_menu("Program", ['Create new', "Templates", "Save this program"],
-        icons=['house', 'folder','save'], menu_icon="cast", default_index=0)
+    menu_sidebar = option_menu("Program", ['Create new', "Templates", "Save this program", "Edit data"],
+        icons=['house', 'folder','save',"pencil-square"], menu_icon="cast", default_index=0)
     
-menu = option_menu(None, ["Itinerary","Activities & Transportation","Accommodations","Pricing"], 
-    icons=['calendar', 'binoculars', "tag", 'credit-card'], 
-    menu_icon="cast", default_index=0, orientation="horizontal",
-    styles={
-        "container": {"padding": "0!important", "background-color": "#fafafa"},
-        "icon": {"color": "#212529", "font-size": "15px"}, 
-        "nav-link": {"font-size": "15px", "text-align": "left", "margin":"10px", "--hover-color": "#eee"},
-        "nav-link-selected": {"background-color": "#ffc300"},
-    }
-)
-
 
 ##############################
 # Data for Itinerary 
@@ -120,11 +112,9 @@ if "dias_6" not in st.session_state:
     
     
     
-if menu_sidebar == "Templates":
-    st.write("Estamos trabajando en ello")
     
 if menu_sidebar == "Create new":
-    
+    st.sidebar.selectbox("Lenguage", ["English", "Spanish", "Alemán"], index=0)
     st.sidebar.subheader("Passengers")
     adultos = st.sidebar.number_input("Personas adultas", min_value=0, max_value=50, value=1, step=1, key="adultos")
     niños = st.sidebar.number_input("Niños(a)", min_value=0, max_value=50, value=0, step=1, key="niños")
@@ -178,7 +168,7 @@ if menu_sidebar == "Create new":
     
     
     
-    st.sidebar.caption("Developed by [**Fidel Ramos**](https://vittaquant-ai.com)")
+    st.sidebar.caption("Developed by  [**Fidel Ramos**](https://vittaquant-ai.com)")
     st.sidebar.caption("**VittaQuant Techonologies**")
     st.sidebar.markdown('##')  
 
@@ -689,7 +679,7 @@ if menu_sidebar == "Create new":
     
     
     price = left.write(f"**The  price is  {precio_total} USD**")
-    markup = left.slider("Markup",0,100,20,key = "markup")
+    markup = left.slider("Markup",20 ,100,20,key = "markup")
     precio_final = round(precio_total + (precio_total*markup)/100,2)
     price_final = left.write(f"**The profit is  {round(precio_final-precio_total,2)} USD**")
     price_final = left.write(f"**The final price is  {precio_final} USD**")
@@ -919,4 +909,57 @@ if menu_sidebar == "Create new":
                 )
         # obtener el valor de renderes de pdf  y luego  mostrarlo para descargar de forma inmediata dependiendo 
         # del usuario
+
+
+
+if menu_sidebar == "Templates":
+    st.info("Estamos trabajando en ello")
+    
+if menu_sidebar == "Save this program":
+    st.info("Estamos trabajando en ello")
+    
+if menu_sidebar == "Edit data":
+    # create menu to edit values
+    menu = option_menu(None, ["Bundle","Activities","Transportation","Accommodations"], 
+        icons=['stack', 'binoculars-fill', 'geo-alt-fill',"calendar-check"], 
+        menu_icon="cast", default_index=0, orientation="horizontal",
+        styles={
+            "container": {"padding": "0!important", "background-color": "#fafafa"},
+            "icon": {"color": "#212529", "font-size": "20px"}, 
+            "nav-link": {"font-size": "15px", "text-align": "left", "margin":"0px", "--hover-color": "#eee"},
+            "nav-link-selected": {"background-color": "#ffc300"},
+        }
+        )
+    
+    if menu == "Bundle":
+        st.info("Estamos trabajando en ello")
+    if menu == "Activities":
         
+        # You should put your data here like : appl.csv, logo.png, etc.
+        bucket_name = "peruviansunrise-storage"
+        url = get_link(bucket_name, 'ejemplo.PNG')
+        if url is not None:
+            response = requests.get(url)
+        st.subheader("Image from S3")
+        st.image(url, width=250)
+        
+        
+        
+        c1, c2 = st.columns(2)
+        c1.subheader("Upload a PNG File")
+
+
+        uploaded_image = c1.file_uploader("Select an PNG file")
+
+        if uploaded_image is not None:
+            # this is call "internet media types" like for example : "video/mp4"
+            if uploaded_image.type != "image/png":  
+                c1.error('Only PNG images are supported. Please upload a different file')
+                
+            else:
+                c1.success(uploaded_image.name + ' Selected')
+                
+                if c1.button('Upload'):
+                    with st.spinner('Uploading...'):
+                        # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                        uploadimageToS3(uploaded_image,bucket_name , uploaded_image.name)
