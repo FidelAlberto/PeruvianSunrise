@@ -4,17 +4,20 @@
 ############################
 import pymongo
 from pymongo import MongoClient
-import pandas as pd
 import random
 from time import sleep
+import streamlit as st
 
-# Conexion con Mongodb Atlas
-cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
-# db = client.get_database("divisas")
+# st.title("MongoDB Connection")
+# Conexion con Mongodb Atlas in PC windows and  in cloud streamlit
+
+# cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+
+cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+
 db = cluster["peruviansunrise"]
 collection = db["activities"]
-collection.insert_one({"_id":5, "user_name":"Soumi"})
-collection.insert_one({"_id":500, "user_name":"Ravi"})
+collection.insert_one({"_id":12, "user_name":"Fidel"})
 
 
 
