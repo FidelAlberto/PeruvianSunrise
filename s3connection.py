@@ -17,10 +17,14 @@ import boto3
 from botocore.exceptions import ClientError
 import requests 
 
-S3_KEY =  "AKIARCQ5LPGG24TLZA3E"
-S3_SECRET = "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"
+# Iam using the account IAM ""
 bucket_name = "peruviansunrise-storage"
 region_bucket='sa-east-1'
+S3_KEY =  "AKIARCQ5LPGG67G25MGI"
+S3_SECRET = "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"
+
+
+
 
 # connect to s3 service and download a file from S3 bucket
 def get_link(bucket_name, object_name, expiration=3600):
@@ -98,5 +102,33 @@ def uploadimageToS3(file, bucket, s3_file):
 
 #################################################### 
 
+#################################################### 
+
+def delete_s3_file(bucket_name, file_name):
+    s3_client = boto3.client('s3',aws_access_key_id = S3_KEY, 
+                            aws_secret_access_key = S3_SECRET)
+    
+    # s3_client.delete_fileobj(Bucket=bucket_name, Key=file_name)
+    
+    s3_client.delete_object(Bucket=bucket_name, Key=file_name)
+    
+    
+
+# delete_s3_file(bucket_name, "peru-lima-plaza.jpeg")
 
 
+def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
+    """
+    This is  a function to copy a file  and delete the original file
+    """
+    try:
+        client= boto3.client('s3',aws_access_key_id = S3_KEY, 
+                                aws_secret_access_key = S3_SECRET)
+        
+        client.copy_object(Bucket=bucket_name, CopySource=bucket_name+"/"+name_actual, Key=name_new)
+        client.delete_object(Bucket=bucket_name, Key=name_actual)
+    # put this exception is really important
+    except Exception as e:
+        pass 
+    
+# copy_and_delete_s3_file(bucket_name,"name_new", "gato-waton.jpg" )

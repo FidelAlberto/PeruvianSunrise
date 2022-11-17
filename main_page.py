@@ -8,6 +8,10 @@ Cloud Streamlit
 
 from s3connection import uploadimageToS3
 from s3connection import get_link
+from s3connection import delete_s3_file
+from s3connection import copy_and_delete_s3_file
+
+
 
 from genericpath import exists
 import pdfkit
@@ -30,6 +34,12 @@ import pandas as pd
 
 from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder, JsCode
 
+# Mongo db connection needs
+import pymongo
+from pymongo import MongoClient
+import pandas as pd
+import random
+from time import sleep
 #Define path to wkhtmltopdf.exe
 path_to_wkhtmltopdf = r'C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe'
 
@@ -937,95 +947,146 @@ if menu_sidebar == "Data":
     if menu == "Activities":
         
         
-        st.sidebar.radio("Option",["Create new","Edit","Delete"])
-        st.subheader("Create a new activity")
-        title = st.text_input("Title")
-        sep1,sep2 =st.columns(2)
-        operator =sep1.text_input("Operator")
-        email = sep2.text_input("Email")
-        description = st.text_area("Description", key="description")
+        activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"])
+        ############################
+        # Connection to MongoDB
+        ############################
+    
         
+        # Connection to MongoDB since applicacion in streamlit cloud
+        cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+        # Connection to MongoDB since applicacion in local
+        # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+        db = cluster["peruviansunrise"]
         
-        st.subheader("Select 3 images ")
-        uploaded_files = st.file_uploader("" ,accept_multiple_files=True)
+        # FIN
         
-        with st.container():
+        if activities_option == "Edit":
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["activities"]
+            data = collection.find({},{"Name_en":1, "Operator":1,"_id":1})
             
+            list_activities = [""]
+            ids_activities = [""]
+            for value in data:
+                list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad = st.selectbox("Choose the activity",list_activities)
+            if elegir_actividad == "":
+                st.stop()
+            order_activity = list_activities.index(elegir_actividad)
+            code = ids_activities[order_activity]
+            complete_data = collection.find_one({"_id":code})
+            
+            
+            st.subheader("Edit the activity")
+            title = st.text_input("Title in English",complete_data["Name_en"])
+            title_de = st.text_input("Title in German",complete_data["Name_de"])
+            title_es = st.text_input("Title in Spanish", complete_data["Name_es"])
+            
+            sep1,sep2 =st.columns(2)
+            operator =sep1.text_input("Operator", complete_data["Operator"])
+            email = sep2.text_input("Email", complete_data["Email"])
+            description = st.text_area("Description in English", complete_data["Description_en"])
+            description_de = st.text_area("Description in  German", complete_data["Description_de"])
+            description_es = st.text_area("Description in Spanish", complete_data["Description_es"])
+
+            st.subheader("Images")
             c1, c2, c3 = st.columns(3)
-            if len(uploaded_files)==3:
-                c1.image(uploaded_files[0], use_column_width="auto",output_format="PNG")
-                c2.image(uploaded_files[1], use_column_width="auto",output_format="PNG")
-                c3.image(uploaded_files[2], use_column_width="auto",output_format="PNG")
+        
+            bucket_name = "peruviansunrise-storage"
+            
+            url_1 = get_link(bucket_name, complete_data["Images"]["1"])
+            url_2 = get_link(bucket_name, complete_data["Images"]["2"])
+            url_3 = get_link(bucket_name, complete_data["Images"]["3"])
+            
+            # if url_1 is not None:
+            #     response = requests.get(url_1)
+            # if url_2 is not None:
+            #     response = requests.get(url_2)
+            # if url_3 is not None:
+            #     response = requests.get(url_3)
+            
+            c1.image(url_1, use_column_width="auto")
+            c2.image(url_2, use_column_width="auto")
+            c3.image(url_3, use_column_width="auto")
+            with st.container():
+                col1, col2, col3 = st.columns(3)
+                file_1 = col1.file_uploader("Replace the image", key="1_change")
+                file_2 = col2.file_uploader("Replace the image", key="2_change")
+                file_3 = col3.file_uploader("Replace the image", key="3_change")
                 
+                if file_1 is not None:
+                    col1.subheader("The new image")
+                    col1.image(file_1, use_column_width="auto")
+                    
                 
+                if file_2 is not None:
+                    col2.subheader("The new image")
+                    col2.image(file_2, use_column_width="auto")
+                    url_2 = file_2
+                
+                if file_3 is not None:
+                    col3.subheader("The new image")
+                    col3.image(file_3, use_column_width="auto")
+                    url_3 = file_3
+                
+            
                 @st.cache()
                 def get_data(filas):
                     incluir = np.arange(1,filas+1)
-                    values = [1]*filas
+                    values = [0]*(filas)
                     df = pd.DataFrame(
-                        {"Amount of People": incluir,"Price":values}
+                        {"Amount of People": incluir,"Price Adults":values,"Price Kids":values}
                     )
                     return df
-                @st.cache()
-                def get_data_2(filas):
+                
+                def get_data_b(filas, adult_prices, kid_prices):
+                    
                     incluir = np.arange(1,filas+1)
-                    values = [0]*filas
+                    cantidad_filas_data = len(adult_prices)
+                    values_1 = adult_prices + [0]*(filas-cantidad_filas_data)
+                    values_2 = kid_prices + [0]*(filas-cantidad_filas_data)
+                    
                     df = pd.DataFrame(
-                        {"Amount of People": incluir,"Price":values}
+                        {"Amount of People": incluir,"Price Adults":values_1,"Price Kids":values_2}
                     )
                     return df
+                    
                 st.subheader("Prices")
-                precios_fijos = st.checkbox("Fixed price")
-                precios_kids = st.checkbox("Include prices to kids")
-                precios_adultos = st.checkbox("Include prices to adults")
                 
                 
+                lista = [complete_data["Fixed_price"],complete_data["Price_kid_and_adult"]]  
+                indice=0
+                for x in lista:
+                    if x!=False:
+                        break
+                    indice+=1
+                    
+                elegir_precio = st.radio("Choose the price",["Fixed Price","Adults and Kids"],horizontal=True, index=indice)
+                precios_fijos = False
+                precios_adultos = False
+                precios_kids = False
                 
                 
-                
-                col1,col2 = st.columns(2)
-                if precios_fijos:
+                col1,col2 = st.columns([2,1])
+                if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]==False:
                     precios_fijos = col1.number_input("Price", key="price_fixed")
+                if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]!=False:
+                    precios_fijos = col1.number_input("Price", key="price_fixed_1",value=complete_data["Fixed_price"])
                 
-                if precios_adultos:
+                
+                
+                if elegir_precio == "Adults and Kids" and complete_data["Price_kid_and_adult"]==False:
                     with col1:
-                        st.subheader("Prices to adults")
-                            
-                        numero_filas = st.slider("Number of adults",1,15,step=1, value=5 ,key="<uniquevalueofsomesort>")
-                        
-                        data = get_data_2(numero_filas)
-                        gb = GridOptionsBuilder.from_dataframe(data)
-                        #make all columns editable
-                        gb.configure_columns(["Amount of People","Price"], editable=True)
-                        go = gb.build()
-                        
-                        ag = AgGrid(
-                            data, 
-                            gridOptions=go, 
-                            # height=300, 
-                            fit_columns_on_grid_load=True,
-                            theme= "alpine" # or "streamlit","alpine","balham","material"
-                            
-                        )
-                        # st.subheader("Returned Data")
-                        df_prices_adults = ag["data"]
-                        # st.dataframe(ag['data'])
-                        df_prices_1 = df_prices_adults["Amount of People"].values.tolist()
-                        df_prices_2 = df_prices_adults["Price"].values.tolist()
-                        df_prices_1 = [x for x in df_prices_1 if str(x) != 'nan']
-                        df_prices_2 = [x for x in df_prices_2 if str(x) != 'nan']
-                        precios_adultos = [df_prices_1,df_prices_2]
-                        # st.write(precios_adultos)
-                        
-                if precios_kids:
-                    with col2:
-                        st.subheader("Prices to kids")
-                        numero_filas_k = st.slider("Number of kids",1,15,step=1, value=5, key="kids_slider")
+                        st.subheader("Prices to adults and kids")
+                        numero_filas_k = st.slider("Number of people",1,15,step=1, value=5, key="adults_kids_slider")
                         
                         data_k = get_data(numero_filas_k)
                         gb_k = GridOptionsBuilder.from_dataframe(data_k)
                         #make all columns editable
-                        gb_k.configure_columns(["Amount of People","Price"], editable=True)
+                        gb_k.configure_columns(["Amount of People","Price Adults","Price Kids"], editable=True)
                         go_k = gb_k.build()
                         
                         ag_k = AgGrid(
@@ -1041,44 +1102,114 @@ if menu_sidebar == "Data":
                         df_prices_kids = ag_k["data"]
                         # st.dataframe(ag['data'])
                         df_prices_1k = df_prices_kids["Amount of People"].values.tolist()
-                        df_prices_2k = df_prices_kids["Price"].values.tolist()
+                        df_prices_2k = df_prices_kids["Price Adults"].values.tolist()
+                        df_prices_3k = df_prices_kids["Price Kids"].values.tolist()
+                        
                         df_prices_1k = [x for x in df_prices_1k if str(x) != 'nan']
                         df_prices_2k = [x for x in df_prices_2k if str(x) != 'nan']
-                        precios_kids = [df_prices_1k,df_prices_2k]
+                        df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
+                        precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
                         # st.write(precios_kids)
-
-                
-                
-                st.subheader("Upload  data")
-                subir = st.button('Save all data')
-                if subir:
-                    title_separate = title.replace(" ", "_")
-                    operator_separate = operator.replace(" ", "_")
-                    with st.spinner('Uploading...'):
                         
-                        image_1 = title_separate+"_"+operator_separate+"_1.png"
-                        image_2 = title_separate+"_"+operator_separate+"_2.png"
-                        image_3 = title_separate+"_"+operator_separate+"_3.png"
-                        # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
-                        uploadimageToS3(uploaded_files[0],bucket_name , image_1)
-                        uploadimageToS3(uploaded_files[1],bucket_name , image_2)
-                        uploadimageToS3(uploaded_files[2],bucket_name , image_3)
-                
-                
+                if elegir_precio == "Adults and Kids" and complete_data["Price_kid_and_adult"]!=False:
+                    with col1:
+                        st.subheader("Prices to adults and kids")
+                        elementos_data = len(complete_data["Price_kid_and_adult"][1])
+                        numero_filas_k = st.slider("Number of people",elementos_data,15,step=1, value=elementos_data, key="adults_kids_slider")
+                        
+                        data_k = get_data_b(numero_filas_k, complete_data["Price_kid_and_adult"][1], complete_data["Price_kid_and_adult"][2])
+                        gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                        #make all columns editable
+                        gb_k.configure_columns(["Amount of People","Price Adults","Price Kids"], editable=True)
+                        go_k = gb_k.build()
+                        
+                        ag_k = AgGrid(
+                            data_k, 
+                            gridOptions=go_k, 
+                            # height=300, 
+                            fit_columns_on_grid_load=True,
+                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                        )
+                        # st.subheader("Returned Data")
+                        # st.dataframe(ag_k['data'])
+                        
+                        df_prices_kids = ag_k["data"]
+                        # st.dataframe(ag['data'])
+                        df_prices_1k = df_prices_kids["Amount of People"].values.tolist()
+                        df_prices_2k = df_prices_kids["Price Adults"].values.tolist()
+                        df_prices_3k = df_prices_kids["Price Kids"].values.tolist()
+                        
+                        df_prices_1k = [x for x in df_prices_1k if str(x) != 'nan']
+                        df_prices_2k = [x for x in df_prices_2k if str(x) != 'nan']
+                        df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
+                        precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
+                        # st.write(precios_kids)
+                        
+                st.subheader("Save changes")
+                subir = st.button('Save data')
+                if subir:
+                    # reemplazar los espacios por guiones bajos
+                    if complete_data["Name_en"]==title and complete_data["Operator"]==operator:
+                        
+                        title_separate = title.replace(" ", "_")
+                        operator_separate = operator.replace(" ", "_")
+                        with st.spinner('Uploading...'):
+                            
+                            image_1 = title_separate+"_"+operator_separate+"_1.png"
+                            image_2 = title_separate+"_"+operator_separate+"_2.png"
+                            image_3 = title_separate+"_"+operator_separate+"_3.png"
+                            # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                            
+                            if file_1 is not None:
+                                uploadimageToS3(file_1,bucket_name , image_1)
+                            if file_2 is not None:
+                                uploadimageToS3(file_2,bucket_name , image_2)
+                            if file_3 is not None:
+                                uploadimageToS3(file_3,bucket_name , image_3)
+                                
+                            
+                    
+                    
+                    if complete_data["Name_en"]!=title or complete_data["Operator"]!=operator:
+                        
+                        antiguas = []
+                        for image in complete_data["Images"].values():
+                            antiguas.append(image)
+                        # for image in complete_data["Images"].values():
+                        delete_s3_file(bucket_name, "peru-lima-plaza.jpeg")
+                        
+                        title_separate = title.replace(" ", "_")
+                        operator_separate = operator.replace(" ", "_")
+                        
+                        
+                        with st.spinner('Uploading...'):
+                            
+                            image_1 = title_separate+"_"+operator_separate+"_1.png"
+                            image_2 = title_separate+"_"+operator_separate+"_2.png"
+                            image_3 = title_separate+"_"+operator_separate+"_3.png"
+                            
+                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[0])
+                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[1])
+                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[2])
+                            
+                            # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                            if file_1 is not None:
+                                uploadimageToS3(file_1,bucket_name , image_1)
+                            if file_2 is not None:
+                                uploadimageToS3(file_2,bucket_name , image_2)
+                            if file_3 is not None:
+                                uploadimageToS3(file_3,bucket_name , image_3)
+                                
+                    with st.spinner('Saving...'):
                         ############################
                         # Connection to MongoDB
                         ############################
-                        import pymongo
-                        from pymongo import MongoClient
-                        import pandas as pd
-                        import random
-                        from time import sleep
-                        
+                    
                         # Connection to MongoDB since applicacion in streamlit cloud
-                        cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+                        # cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
                         # Connection to MongoDB since applicacion in local
                         # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
-                        db = cluster["peruviansunrise"]
+                        # db = cluster["peruviansunrise"]
                         
                         collection = db["activities"]
                         
@@ -1086,17 +1217,154 @@ if menu_sidebar == "Data":
                         # Price_adult is [[people],[price]]
                         
                         record = {
-                        "Name_en": title,
+                        "Name_en": title, # ingles
+                        "Name_de": title_de, # aleman
+                        "Name_es": title_es, # español
                         "Description_en": description,
-                        "Price_adult": precios_adultos,
-                        "Price_kid": precios_kids,
+                        "Description_de": description_de,
+                        "Description_es": description_es,
+                        "Price_kid_and_adult": precios_kids,
                         "Fixed_price": precios_fijos,
                         "Images":{"1": image_1, "2": image_2, "3":image_3},
                         "Operator": operator,
                         "Email": email
                         }
                         
-                        collection.insert_one(record)
+                        collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
+                        st.info("Data saved successfully")
+                    
+                
+        ########################
+        # Create a new activity 
+        ########################
+        if activities_option == "Create new":
+            
+            st.subheader("Create a new activity")
+            title = st.text_input("Title in English")
+            title_de = st.text_input("Title in German")
+            title_es = st.text_input("Title in Spanish")
+            
+            sep1,sep2 =st.columns(2)
+            operator =sep1.text_input("Operator")
+            email = sep2.text_input("Email")
+            description = st.text_area("Description in English")
+            description_de = st.text_area("Description in  German")
+            description_es = st.text_area("Description in Spanish")
+
+            
+            st.subheader("Select 3 images ")
+            uploaded_files = st.file_uploader("" ,accept_multiple_files=True)
+            
+            with st.container():
+                
+                c1, c2, c3 = st.columns(3)
+                if len(uploaded_files)==3:
+                    c1.image(uploaded_files[0], use_column_width="auto",output_format="PNG")
+                    c2.image(uploaded_files[1], use_column_width="auto",output_format="PNG")
+                    c3.image(uploaded_files[2], use_column_width="auto",output_format="PNG")
+                    
+                    
+                    @st.cache()
+                    def get_data(filas):
+                        incluir = np.arange(1,filas+1)
+                        values = [0]*(filas)
+                        df = pd.DataFrame(
+                            {"Amount of People": incluir,"Price Adults":values,"Price Kids":values}
+                        )
+                        return df
+                    
+                    st.subheader("Prices")
+                    
+                    elegir_precio = st.radio("Choose the price",["Fixed Price","Adults and Kids"],horizontal=True)
+                    precios_fijos = False
+                    
+                    precios_kids = False
+                    
+                    
+                    col1,col2 = st.columns([2,1])
+                    if elegir_precio == "Fixed Price":
+                        precios_fijos = col1.number_input("Price", key="price_fixed")
+                            
+                    if elegir_precio == "Adults and Kids":
+                        with col1:
+                            st.subheader("Prices to adults and kids")
+                            numero_filas_k = st.slider("Number of people",1,15,step=1, value=5, key="adults_kids_slider")
+                            
+                            data_k = get_data(numero_filas_k)
+                            gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                            #make all columns editable
+                            gb_k.configure_columns(["Amount of People","Price Adults","Price Kids"], editable=True)
+                            go_k = gb_k.build()
+                            
+                            ag_k = AgGrid(
+                                data_k, 
+                                gridOptions=go_k, 
+                                # height=300, 
+                                fit_columns_on_grid_load=True,
+                                theme= "alpine" # or "streamlit","alpine","balham","material"
+                            )
+                            # st.subheader("Returned Data")
+                            # st.dataframe(ag_k['data'])
+                            
+                            df_prices_kids = ag_k["data"]
+                            # st.dataframe(ag['data'])
+                            df_prices_1k = df_prices_kids["Amount of People"].values.tolist()
+                            df_prices_2k = df_prices_kids["Price Adults"].values.tolist()
+                            df_prices_3k = df_prices_kids["Price Kids"].values.tolist()
+                            
+                            df_prices_1k = [x for x in df_prices_1k if str(x) != 'nan']
+                            df_prices_2k = [x for x in df_prices_2k if str(x) != 'nan']
+                            df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
+                            precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
+                            # st.write(precios_kids)
+
+                    
+                    
+                    st.subheader("Upload  data")
+                    subir = st.button('Save all data')
+                    if subir:
+                        # reemplazar los espacios por guiones bajos
+                        title_separate = title.replace(" ", "_")
+                        operator_separate = operator.replace(" ", "_")
+                        with st.spinner('Uploading...'):
+                            
+                            image_1 = title_separate+"_"+operator_separate+"_1.png"
+                            image_2 = title_separate+"_"+operator_separate+"_2.png"
+                            image_3 = title_separate+"_"+operator_separate+"_3.png"
+                            # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                            uploadimageToS3(uploaded_files[0],bucket_name , image_1)
+                            uploadimageToS3(uploaded_files[1],bucket_name , image_2)
+                            uploadimageToS3(uploaded_files[2],bucket_name , image_3)
+                            ############################
+                            # Connection to MongoDB
+                            ############################
+                        
+                            # Connection to MongoDB since applicacion in streamlit cloud
+                            # cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+                            # Connection to MongoDB since applicacion in local
+                            # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+                            # db = cluster["peruviansunrise"]
+                            
+                            collection = db["activities"]
+                            
+                            # In this section you can add new activities to the database
+                            # Price_adult is [[people],[price]]
+                            
+                            record = {
+                            "Name_en": title, # ingles
+                            "Name_de": title_de, # aleman
+                            "Name_es": title_es, # español
+                            "Description_en": description,
+                            "Description_de": description_de,
+                            "Description_es": description_es,
+                            "Price_kid_and_adult": precios_kids,
+                            "Fixed_price": precios_fijos,
+                            "Images":{"1": image_1, "2": image_2, "3":image_3},
+                            "Operator": operator,
+                            "Email": email
+                            }
+                            
+                            collection.insert_one(record)
 
 
 
@@ -1110,5 +1378,5 @@ if menu_sidebar == "Data":
         if url is not None:
             response = requests.get(url)
         st.subheader("Image from S3")
-        st.image(url, width=250, )
+        st.image(url, width=250 )
 
