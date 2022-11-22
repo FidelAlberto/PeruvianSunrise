@@ -104,23 +104,23 @@ def uploadimageToS3(file, bucket, s3_file):
 # delete one object from S3 bucket  using another user in group = "s3storage"
 #################################################### 
 
-def delete_s3_file(bucket_name, name_actual):
-    """
-    This is  a function to copy a file  and delete the original file
-    """
-    try:
-        s3 = boto3.client('s3',
-                        region_name=region_bucket,
-                        aws_access_key_id= "AKIARCQ5LPGGVMGM6N6M",
-                        aws_secret_access_key="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")
+# def delete_s3_file(bucket_name, name_actual):
+#     """
+#     This is  a function to copy a file  and delete the original file
+#     """
+#     try:
+#         s3 = boto3.client('s3',
+#                         region_name='sa-east-1',
+#                         aws_access_key_id= "AKIARCQ5LPGGVMGM6N6M",
+#                         aws_secret_access_key="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")
         
-        s3.delete_object(Bucket=bucket_name, Key=name_actual)
-    # put this exception is really important
-    except Exception as e:
-        pass 
+#         s3.delete_object(Bucket=bucket_name, Key=name_actual)
+#     # put this exception is really important
+#     except Exception as e:
+#         pass 
 
 
-# delete_s3_file(bucket_name, "Puerto_Maldonado.png")
+# delete_s3_file(bucket_name, "cuscolandia.png")
 
 
 
@@ -141,3 +141,20 @@ def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
         pass 
     
 # copy_and_delete_s3_file(bucket_name,"miau_asdg_3.png", "fidel_ramos.png" )
+
+
+
+#################################################### 
+# delete one object from S3 bucket  using another user in group = "s3storage"
+#################################################### 
+
+# this user used administrator privileges 
+import boto3
+def delete_s3_file(bucket_name, name_actual):
+    #  jefaso is a user
+    s3 = boto3.resource('s3',aws_access_key_id = "AKIARCQ5LPGGWQVCSCD5", 
+                                    aws_secret_access_key = "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")
+    s3.Object(bucket_name, name_actual).delete()
+        
+
+
