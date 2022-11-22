@@ -960,9 +960,9 @@ if menu_sidebar == "Data":
 
     
     # Connection to MongoDB since applicacion in streamlit cloud
-    # cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+    cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
     # Connection to MongoDB since applicacion in local
-    cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+    # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
     db = cluster["peruviansunrise"]
     
     # FIN
