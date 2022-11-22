@@ -20,8 +20,10 @@ import requests
 # Iam using the account IAM ""
 bucket_name = "peruviansunrise-storage"
 region_bucket='sa-east-1'
-S3_KEY =  "AKIARCQ5LPGG67G25MGI"
-S3_SECRET = "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"
+S3_KEY = st.secrets["db_username"]
+S3_SECRET = st.secrets["db_password"]
+# S3_KEY =  "AKIARCQ5LPGG67G25MGI"
+# S3_SECRET = "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"
 
 
 
@@ -152,8 +154,8 @@ def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
 import boto3
 def delete_s3_file(bucket_name, name_actual):
     #  jefaso is a user
-    s3 = boto3.resource('s3',aws_access_key_id = "AKIARCQ5LPGGWQVCSCD5", 
-                                    aws_secret_access_key = "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")
+    s3 = boto3.resource('s3',aws_access_key_id = S3_KEY, 
+                                    aws_secret_access_key = S3_SECRET)
     s3.Object(bucket_name, name_actual).delete()
         
 
