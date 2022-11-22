@@ -111,8 +111,8 @@ def delete_s3_file(bucket_name, name_actual):
     try:
         s3 = boto3.client('s3',
                         region_name=region_bucket,
-                        aws_access_key_id= "AKIARCQ5LPGG7RJWKF5P",
-                        aws_secret_access_key="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")
+                        aws_access_key_id= "AKIARCQ5LPGGVMGM6N6M",
+                        aws_secret_access_key="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")
         
         s3.delete_object(Bucket=bucket_name, Key=name_actual)
     # put this exception is really important
@@ -120,7 +120,7 @@ def delete_s3_file(bucket_name, name_actual):
         pass 
 
 
-# delete_s3_file(bucket_name, "Puertito_bonito.png")
+# delete_s3_file(bucket_name, "Puerto_Maldonado.png")
 
 
 
