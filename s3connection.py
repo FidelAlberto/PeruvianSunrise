@@ -135,7 +135,7 @@ def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
                                 aws_secret_access_key = S3_SECRET)
         
         client.copy_object(Bucket=bucket_name, CopySource=bucket_name+"/"+name_actual, Key=name_new)
-        
+        client.delete_object(Bucket=bucket_name, Key=name_actual)
     # put this exception is really important
     except Exception as e:
         pass 
