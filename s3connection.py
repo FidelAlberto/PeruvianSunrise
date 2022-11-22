@@ -101,22 +101,31 @@ def uploadimageToS3(file, bucket, s3_file):
 #                 uploadimageToS3(uploaded_image,bucket_name , uploaded_image.name)
 
 #################################################### 
-
+# delete one object from S3 bucket  using another user in group = "s3storage"
 #################################################### 
 
-def delete_s3_file(bucket_name, file_name):
-    s3_client = boto3.client('s3',aws_access_key_id = S3_KEY, 
-                            aws_secret_access_key = S3_SECRET)
-    
-    # s3_client.delete_fileobj(Bucket=bucket_name, Key=file_name)
-    
-    s3_client.delete_object(Bucket=bucket_name, Key=file_name)
-    
+def delete_s3_file(bucket_name, name_actual):
+    """
+    This is  a function to copy a file  and delete the original file
+    """
+    try:
+        s3 = boto3.client('s3',
+                        region_name=region_bucket,
+                        aws_access_key_id= "AKIARCQ5LPGGXE4E53VL",
+                        aws_secret_access_key="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")
+        
+        s3.delete_object(Bucket=bucket_name, Key=name_actual)
+    # put this exception is really important
+    except Exception as e:
+        pass 
     
 
-# delete_s3_file(bucket_name, "peru-lima-plaza.jpeg")
+# delete_s3_file("testdelete", "qoricancha.jpg")
 
 
+
+# this use a user with group="s3-full-2"
+# not delete because this doesn't work
 def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
     """
     This is  a function to copy a file  and delete the original file
@@ -126,9 +135,9 @@ def copy_and_delete_s3_file(bucket_name, name_actual, name_new):
                                 aws_secret_access_key = S3_SECRET)
         
         client.copy_object(Bucket=bucket_name, CopySource=bucket_name+"/"+name_actual, Key=name_new)
-        client.delete_object(Bucket=bucket_name, Key=name_actual)
+        
     # put this exception is really important
     except Exception as e:
         pass 
     
-# copy_and_delete_s3_file(bucket_name,"name_new", "gato-waton.jpg" )
+# copy_and_delete_s3_file(bucket_name,"miau_asdg_3.png", "fidel_ramos.png" )

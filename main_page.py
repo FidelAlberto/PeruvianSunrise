@@ -19,6 +19,10 @@ from jinja2 import Environment, PackageLoader, select_autoescape, FileSystemLoad
 from datetime import date
 import streamlit as st
 from streamlit.components.v1 import iframe
+# extra components
+import hydralit_components as hc
+import extra_streamlit_components as stx
+# fin extra components
 import numpy as np
 import pandas as pd
 import time
@@ -37,6 +41,7 @@ from st_aggrid import AgGrid, DataReturnMode, GridUpdateMode, GridOptionsBuilder
 # Mongo db connection needs
 import pymongo
 from pymongo import MongoClient
+from bson import ObjectId
 import pandas as pd
 import random
 from time import sleep
@@ -124,6 +129,11 @@ if "dias_6" not in st.session_state:
     
     
 if menu_sidebar == "Create new":
+    
+
+    val = stx.stepper_bar(steps=["Fase 0", "Data", "Diseño", "Revision"])
+    # st.info(f"Phase #{val}")
+
     st.sidebar.selectbox("Lenguage", ["English", "Spanish", "Alemán"], index=0)
     st.sidebar.subheader("Passengers")
     adultos = st.sidebar.number_input("Personas adultas", min_value=0, max_value=50, value=1, step=1, key="adultos")
@@ -931,8 +941,8 @@ if menu_sidebar == "Save this program":
 if menu_sidebar == "Data":
     # create menu to edit values
     bucket_name = "peruviansunrise-storage"
-    menu = option_menu(None, ["Bundle","Activities","Transportation","Accommodations"], 
-        icons=['stack', 'binoculars-fill', 'geo-alt-fill',"calendar-check"], 
+    menu = option_menu(None, ["Bundle","Location","Activities","Transportation","Accommodations"], 
+        icons=['stack','geo-alt-fill', 'binoculars-fill',"tag-fill" ,"moon-stars-fill"], 
         menu_icon="cast", default_index=0, orientation="horizontal",
         styles={
             "container": {"padding": "0!important", "background-color": "#fafafa"},
@@ -942,24 +952,24 @@ if menu_sidebar == "Data":
         }
         )
     
-    if menu == "Bundle":
-        st.info("Estamos trabajando en ello")
+    
+    
+    ############################
+    # Connection to MongoDB
+    ############################
+
+    
+    # Connection to MongoDB since applicacion in streamlit cloud
+    # cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+    # Connection to MongoDB since applicacion in local
+    cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+    db = cluster["peruviansunrise"]
+    
+    # FIN
+        
     if menu == "Activities":
         
-        
         activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"])
-        ############################
-        # Connection to MongoDB
-        ############################
-    
-        
-        # Connection to MongoDB since applicacion in streamlit cloud
-        cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
-        # Connection to MongoDB since applicacion in local
-        # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
-        db = cluster["peruviansunrise"]
-        
-        # FIN
         
         if activities_option == "Edit":
             # Pedir datos de mongo db para  obtener los nombres de las actividades
@@ -969,7 +979,7 @@ if menu_sidebar == "Data":
             list_activities = [""]
             ids_activities = [""]
             for value in data:
-                list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
+                list_activities.append(value["Name_en"] + "(" + value["Operator"]+ ")")
                 ids_activities.append(value["_id"])
             # FIN 
             elegir_actividad = st.selectbox("Choose the activity",list_activities)
@@ -985,9 +995,24 @@ if menu_sidebar == "Data":
             title_de = st.text_input("Title in German",complete_data["Name_de"])
             title_es = st.text_input("Title in Spanish", complete_data["Name_es"])
             
-            sep1,sep2 =st.columns(2)
+            # lista de las locations
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+            # fin
+            
+            sep1,sep2, sep3 =st.columns(3)
             operator =sep1.text_input("Operator", complete_data["Operator"])
             email = sep2.text_input("Email", complete_data["Email"])
+            locations = sep3.multiselect("Choose the locations",list_activities, default=complete_data["Location"])
+            if len(locations)==0:
+                st.stop()
+            
+        
             description = st.text_area("Description in English", complete_data["Description_en"])
             description_de = st.text_area("Description in  German", complete_data["Description_de"])
             description_es = st.text_area("Description in Spanish", complete_data["Description_es"])
@@ -1074,7 +1099,7 @@ if menu_sidebar == "Data":
                 if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]==False:
                     precios_fijos = col1.number_input("Price", key="price_fixed")
                 if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]!=False:
-                    precios_fijos = col1.number_input("Price", key="price_fixed_1",value=complete_data["Fixed_price"])
+                    precios_fijos = col1.number_input("Price", key="price_fixed_1",value=complete_data["Fixed_price"], step=1)
                 
                 
                 
@@ -1153,7 +1178,8 @@ if menu_sidebar == "Data":
                         
                         title_separate = title.replace(" ", "_")
                         operator_separate = operator.replace(" ", "_")
-                        with st.spinner('Uploading...'):
+                        
+                        with st.spinner("Uploading data..."):
                             
                             image_1 = title_separate+"_"+operator_separate+"_1.png"
                             image_2 = title_separate+"_"+operator_separate+"_2.png"
@@ -1166,6 +1192,33 @@ if menu_sidebar == "Data":
                                 uploadimageToS3(file_2,bucket_name , image_2)
                             if file_3 is not None:
                                 uploadimageToS3(file_3,bucket_name , image_3)
+                                
+                            ############################
+                            # Connection to MongoDB
+                            ############################
+                            
+                            collection = db["activities"]
+                            
+                            # In this section you can add new activities to the database
+                            # Price_adult is [[people],[price]]
+                            
+                            record = {
+                            "Name_en": title, # ingles
+                            "Name_de": title_de, # aleman
+                            "Name_es": title_es, # español
+                            "Description_en": description,
+                            "Description_de": description_de,
+                            "Description_es": description_es,
+                            "Price_kid_and_adult": precios_kids,
+                            "Fixed_price": precios_fijos,
+                            "Images":{"1": image_1, "2": image_2, "3":image_3},
+                            "Operator": operator,
+                            "Email": email,
+                            "Location": locations
+                            }
+                            
+                            collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
+                            st.info("Data saved successfully")
                                 
                             
                     
@@ -1176,22 +1229,25 @@ if menu_sidebar == "Data":
                         for image in complete_data["Images"].values():
                             antiguas.append(image)
                         # for image in complete_data["Images"].values():
-                        delete_s3_file(bucket_name, "peru-lima-plaza.jpeg")
+                        
                         
                         title_separate = title.replace(" ", "_")
                         operator_separate = operator.replace(" ", "_")
                         
-                        
-                        with st.spinner('Uploading...'):
+                    
+                        with st.spinner('Saving'):
                             
                             image_1 = title_separate+"_"+operator_separate+"_1.png"
                             image_2 = title_separate+"_"+operator_separate+"_2.png"
                             image_3 = title_separate+"_"+operator_separate+"_3.png"
                             
-                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[0])
-                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[1])
-                            copy_and_delete_s3_file(bucket_name,image_1,antiguas[2])
+                            copy_and_delete_s3_file(bucket_name,antiguas[0], image_1)
+                            copy_and_delete_s3_file(bucket_name,antiguas[1], image_2)
+                            copy_and_delete_s3_file(bucket_name,antiguas[2],image_3)
                             
+                            delete_s3_file(bucket_name, antiguas[0])
+                            delete_s3_file(bucket_name, antiguas[1])
+                            delete_s3_file(bucket_name, antiguas[2])
                             # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
                             if file_1 is not None:
                                 uploadimageToS3(file_1,bucket_name , image_1)
@@ -1200,38 +1256,34 @@ if menu_sidebar == "Data":
                             if file_3 is not None:
                                 uploadimageToS3(file_3,bucket_name , image_3)
                                 
-                    with st.spinner('Saving...'):
-                        ############################
-                        # Connection to MongoDB
-                        ############################
-                    
-                        # Connection to MongoDB since applicacion in streamlit cloud
-                        # cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
-                        # Connection to MongoDB since applicacion in local
-                        # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
-                        # db = cluster["peruviansunrise"]
+                            ############################
+                            # Connection to MongoDB
+                            ############################
                         
-                        collection = db["activities"]
-                        
-                        # In this section you can add new activities to the database
-                        # Price_adult is [[people],[price]]
-                        
-                        record = {
-                        "Name_en": title, # ingles
-                        "Name_de": title_de, # aleman
-                        "Name_es": title_es, # español
-                        "Description_en": description,
-                        "Description_de": description_de,
-                        "Description_es": description_es,
-                        "Price_kid_and_adult": precios_kids,
-                        "Fixed_price": precios_fijos,
-                        "Images":{"1": image_1, "2": image_2, "3":image_3},
-                        "Operator": operator,
-                        "Email": email
-                        }
-                        
-                        collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
-                        st.info("Data saved successfully")
+                            
+                            collection = db["activities"]
+                            
+                            # In this section you can add new activities to the database
+                            # Price_adult is [[people],[price]]
+                            
+                            record = {
+                            "Name_en": title, # ingles
+                            "Name_de": title_de, # aleman
+                            "Name_es": title_es, # español
+                            "Description_en": description,
+                            "Description_de": description_de,
+                            "Description_es": description_es,
+                            "Price_kid_and_adult": precios_kids,
+                            "Fixed_price": precios_fijos,
+                            "Images":{"1": image_1, "2": image_2, "3":image_3},
+                            "Operator": operator,
+                            "Email": email,
+                            "Location": locations
+                            }
+                            
+                            collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
+                            st.info("Data saved successfully")
+                                
                     
                 
         ########################
@@ -1244,9 +1296,24 @@ if menu_sidebar == "Data":
             title_de = st.text_input("Title in German")
             title_es = st.text_input("Title in Spanish")
             
-            sep1,sep2 =st.columns(2)
+            # lista de las locations
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+
+            # fin
+            
+            sep1,sep2, sep3 =st.columns(3)
             operator =sep1.text_input("Operator")
             email = sep2.text_input("Email")
+            locations = sep3.multiselect("Choose the locations",list_activities)
+            if len(locations)==0:
+                st.stop()
+            
             description = st.text_area("Description in English")
             description_de = st.text_area("Description in  German")
             description_es = st.text_area("Description in Spanish")
@@ -1283,7 +1350,7 @@ if menu_sidebar == "Data":
                     
                     col1,col2 = st.columns([2,1])
                     if elegir_precio == "Fixed Price":
-                        precios_fijos = col1.number_input("Price", key="price_fixed")
+                        precios_fijos = col1.number_input("Price", key="price_fixed" , step=1)
                             
                     if elegir_precio == "Adults and Kids":
                         with col1:
@@ -1361,12 +1428,203 @@ if menu_sidebar == "Data":
                             "Fixed_price": precios_fijos,
                             "Images":{"1": image_1, "2": image_2, "3":image_3},
                             "Operator": operator,
-                            "Email": email
+                            "Email": email,
+                            "Location": locations
                             }
                             
                             collection.insert_one(record)
-
-
+        ########################
+        # Delete a activity
+        ########################
+        if activities_option == "Delete":
+            st.subheader("Delete a activity")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["activities"]
+            data = collection.find({},{"Name_en":1, "Operator":1,"_id":1})
+            names = []
+            list_activities = [""]
+            ids_activities = [""]
+            for value in data:
+                names.append(value["Name_en"])
+                list_activities.append(value["Name_en"] + "(" + value["Operator"]+ ")")
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad_1 = st.selectbox("Choose the activity",list_activities)
+            if elegir_actividad_1 == "":
+                st.stop()
+            order_activity = list_activities.index(elegir_actividad_1)
+            code = ids_activities[order_activity]
+            
+            complete_data = collection.find_one({"_id":code})
+            
+            
+            
+            title = st.header(complete_data["Name_en"])
+            description = st.write( complete_data["Description_en"])
+            
+            operator = st.subheader("Operator: "+complete_data["Operator"])
+            
+            email = st.subheader("Email: "+ complete_data["Email"])
+            
+            c1, c2, c3 = st.columns(3)
+        
+            bucket_name = "peruviansunrise-storage"
+            
+            url_1 = get_link(bucket_name, complete_data["Images"]["1"])
+            url_2 = get_link(bucket_name, complete_data["Images"]["2"])
+            url_3 = get_link(bucket_name, complete_data["Images"]["3"])
+            
+            
+            c1.image(url_1, use_column_width="auto")
+            c2.image(url_2, use_column_width="auto")
+            c3.image(url_3, use_column_width="auto")
+            with st.container():
+                
+                
+            
+                @st.cache()
+                def get_data(filas):
+                    incluir = np.arange(1,filas+1)
+                    values = [0]*(filas)
+                    df = pd.DataFrame(
+                        {"Amount of People": incluir,"Price Adults":values,"Price Kids":values}
+                    )
+                    return df
+                
+                def get_data_b(filas, adult_prices, kid_prices):
+                    
+                    incluir = np.arange(1,filas+1)
+                    cantidad_filas_data = len(adult_prices)
+                    values_1 = adult_prices + [0]*(filas-cantidad_filas_data)
+                    values_2 = kid_prices + [0]*(filas-cantidad_filas_data)
+                    
+                    df = pd.DataFrame(
+                        {"Amount of People": incluir,"Price Adults":values_1,"Price Kids":values_2}
+                    )
+                    return df
+                    
+                st.subheader("Prices")
+                
+                
+                lista = [complete_data["Fixed_price"],complete_data["Price_kid_and_adult"]]  
+                indice=0
+                for x in lista:
+                    if x!=False:
+                        break
+                    indice+=1
+                    
+                elegir_precio = st.radio("Choose the price",["Fixed Price","Adults and Kids"],horizontal=True, index=indice)
+                precios_fijos = False
+                precios_adultos = False
+                precios_kids = False
+                
+                
+                col1,col2 = st.columns([2,1])
+                if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]==False:
+                    precios_fijos = col1.number_input("Price", key="price_fixed")
+                if elegir_precio == "Fixed Price" and complete_data["Fixed_price"]!=False:
+                    precios_fijos = col1.number_input("Price", key="price_fixed_1",value=complete_data["Fixed_price"])
+                
+                if elegir_precio == "Adults and Kids" and complete_data["Price_kid_and_adult"]==False:
+                    with col1:
+                        st.subheader("Prices to adults and kids")
+                        numero_filas_k = st.slider("Number of people",1,15,step=1, value=5, key="adults_kids_slider")
+                        
+                        data_k = get_data(numero_filas_k)
+                        gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                        #make all columns editable
+                        gb_k.configure_columns(["Amount of People","Price Adults","Price Kids"], editable=True)
+                        go_k = gb_k.build()
+                        
+                        ag_k = AgGrid(
+                            data_k, 
+                            gridOptions=go_k, 
+                            # height=300, 
+                            fit_columns_on_grid_load=True,
+                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                        )
+                        # st.subheader("Returned Data")
+                        # st.dataframe(ag_k['data'])
+                        
+                        df_prices_kids = ag_k["data"]
+                        # st.dataframe(ag['data'])
+                        df_prices_1k = df_prices_kids["Amount of People"].values.tolist()
+                        df_prices_2k = df_prices_kids["Price Adults"].values.tolist()
+                        df_prices_3k = df_prices_kids["Price Kids"].values.tolist()
+                        
+                        df_prices_1k = [x for x in df_prices_1k if str(x) != 'nan']
+                        df_prices_2k = [x for x in df_prices_2k if str(x) != 'nan']
+                        df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
+                        precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
+                        # st.write(precios_kids)
+                        
+                if elegir_precio == "Adults and Kids" and complete_data["Price_kid_and_adult"]!=False:
+                    with col1:
+                        st.subheader("Prices to adults and kids")
+                        elementos_data = len(complete_data["Price_kid_and_adult"][1])
+                        numero_filas_k = st.slider("Number of people",elementos_data,15,step=1, value=elementos_data, key="adults_kids_slider")
+                        
+                        data_k = get_data_b(numero_filas_k, complete_data["Price_kid_and_adult"][1], complete_data["Price_kid_and_adult"][2])
+                        gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                        #make all columns editable
+                        gb_k.configure_columns(["Amount of People","Price Adults","Price Kids"], editable=True)
+                        go_k = gb_k.build()
+                        
+                        ag_k = AgGrid(
+                            data_k, 
+                            gridOptions=go_k, 
+                            # height=300, 
+                            fit_columns_on_grid_load=True,
+                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                        )
+                        # st.subheader("Returned Data")
+                        # st.dataframe(ag_k['data'])
+                        
+                        df_prices_kids = ag_k["data"]
+                        # st.dataframe(ag['data'])
+                        df_prices_1k = df_prices_kids["Amount of People"].values.tolist()
+                        df_prices_2k = df_prices_kids["Price Adults"].values.tolist()
+                        df_prices_3k = df_prices_kids["Price Kids"].values.tolist()
+                        
+                        df_prices_1k = [x for x in df_prices_1k if str(x) != 'nan']
+                        df_prices_2k = [x for x in df_prices_2k if str(x) != 'nan']
+                        df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
+                        precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
+                        # st.write(precios_kids)
+            
+            if st.button("Delete all"):
+                with st.spinner('Deleting...'):    
+                    order_activity = list_activities.index(elegir_actividad_1)
+                    code = ids_activities[order_activity]
+                    # delete activity in mongodb
+                    
+                    collection.delete_one({"_id": ObjectId(code)})
+                    # ---
+                    # delete activity in s3
+                    title = complete_data["Name_en"]
+                    operator = complete_data["Operator"]
+                    
+                    title_separate = title.replace(" ", "_")
+                    operator_separate = operator.replace(" ", "_")
+                    
+                    image_1 = title_separate+"_"+operator_separate+"_1.png"
+                    image_2 = title_separate+"_"+operator_separate+"_2.png"
+                    image_3 = title_separate+"_"+operator_separate+"_3.png"
+                    
+                    try:
+                        delete_s3_file(bucket_name,image_1)
+                        delete_s3_file(bucket_name,image_2)
+                        delete_s3_file(bucket_name,image_3)
+                        st.success("Activity deleted")
+                    # ---
+                    except: 
+                        st.error("Error deleting images")
+                        
+                    
+                        
+            
+            
+            
 
 
 
@@ -1380,3 +1638,212 @@ if menu_sidebar == "Data":
         st.subheader("Image from S3")
         st.image(url, width=250 )
 
+
+    if menu == "Bundle":
+        st.info("Estamos trabajando en ello")
+        
+    if menu == "Location":
+        # mongodb connection 
+        collection = db["locations"]
+        # fin
+        activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"])
+        if activities_option=="Create new":
+            st.subheader("Create new location")
+            name_en = st.text_input("Name in english")
+            name_de = st.text_input("Name in german")
+            name_es = st.text_input("Name in spanish")
+            description_en =st.text_area("Description in english")
+            description_de = st.text_area("Description in german")
+            description_es = st.text_area("Description in spanish")
+            st.subheader("Select 1 image ")
+            uploaded_file = st.file_uploader("")
+        
+            if uploaded_file!=None:
+                st.image(uploaded_file, width = 500 ,output_format="PNG")
+                
+                if st.button("Save"):
+                    # reemplazar los espacios por guiones bajos
+                    title_separate = name_en.replace(" ", "_")
+                    
+                    with st.spinner('Uploading...'):
+                        
+                        image_1 = title_separate+".png"
+                        
+                        # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                        uploadimageToS3(uploaded_file,bucket_name , image_1)
+                       
+                        ############################
+                        # Connection to MongoDB
+                        ############################
+                        
+                        # In this section you can add new activities to the database
+                        # Price_adult is [[people],[price]]
+                        
+                        record = {
+                        "Name_en": name_en, # ingles
+                        "Name_de": name_de, # aleman
+                        "Name_es": name_es, # español
+                        "Description_en": description_en,
+                        "Description_de": description_de,
+                        "Description_es": description_es,
+                        "Images": image_1,
+                        }
+                        
+                        collection.insert_one(record)
+        if activities_option=="Edit":
+            
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            data = collection.find({},{"Name_en":1,"_id":1})
+            
+            list_activities = [""]
+            ids_activities = [""]
+            for value in data:
+                list_activities.append(value["Name_en"])
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad = st.selectbox("Choose the activity",list_activities, key="edit_location")
+            if elegir_actividad == "":
+                st.stop()
+            order_activity = list_activities.index(elegir_actividad)
+            code = ids_activities[order_activity]
+            complete_data = collection.find_one({"_id":code})
+            
+            
+            
+            st.subheader("Create new location")
+            name_en = st.text_input("Name in english", complete_data["Name_en"])
+            name_de = st.text_input("Name in german", complete_data["Name_de"])
+            name_es = st.text_input("Name in spanish", complete_data["Name_es"])
+            description_en =st.text_area("Description in english", complete_data["Description_en"])
+            description_de = st.text_area("Description in german", complete_data["Description_de"])
+            description_es = st.text_area("Description in spanish", complete_data["Description_es"])
+            st.subheader("Image")
+            st.image(get_link(bucket_name, complete_data["Images"]), width=500 )
+            
+            uploaded_file = st.file_uploader("Upload new image")
+        
+            if uploaded_file!=None:
+                st.subheader("New image")
+                st.image(uploaded_file, width = 500 ,output_format="PNG")
+            
+            if st.button("Save"):
+                # reemplazar los espacios por guiones bajos
+                title_separate = name_en.replace(" ", "_")
+                
+                if name_en== complete_data["Name_en"]:
+                    with st.spinner('Uploading...'):
+                        
+                        image_1 = title_separate+".png"
+                        
+                        ############################
+                        # Connection to MongoDB
+                        ############################
+                        
+                        record = {
+                        "Name_en": name_en, # ingles
+                        "Name_de": name_de, # aleman
+                        "Name_es": name_es, # español
+                        "Description_en": description_en,
+                        "Description_de": description_de,
+                        "Description_es": description_es,
+                        "Images": image_1,
+                        }
+                        
+                        collection.update_one({"_id":code},{"$set":record})
+
+                        if uploaded_file is not None:
+                                uploadimageToS3(uploaded_file,bucket_name , image_1)
+                        st.success("Location updated")
+                
+                if name_en!= complete_data["Name_en"]:
+                    with st.spinner('Uploading...'):
+                        
+                        image_1 = title_separate+".png"
+                        
+                        ############################
+                        # Connection to MongoDB
+                        ############################
+                        
+                        record = {
+                        "Name_en": name_en, # ingles
+                        "Name_de": name_de, # aleman
+                        "Name_es": name_es, # español
+                        "Description_en": description_en,
+                        "Description_de": description_de,
+                        "Description_es": description_es,
+                        "Images": image_1,
+                        }
+                        
+                        collection.update_one({"_id":code},{"$set":record})
+                        # working with s3
+                        
+                        copy_and_delete_s3_file(bucket_name, complete_data["Images"], image_1)
+                        delete_s3_file(bucket_name, complete_data["Images"])
+                        
+                        # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                        if uploaded_file is not None:
+                            uploadimageToS3(uploaded_file,bucket_name , image_1)
+                        st.success("Location updated")
+                
+        ########################
+        # Delete a location
+        ########################
+        if activities_option == "Delete":
+            st.subheader("Delete a activity")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["locations"]
+            data = collection.find({},{"Name_en":1, "_id":1})
+            names = []
+            list_activities = [""]
+            ids_activities = [""]
+            for value in data:
+                names.append(value["Name_en"])
+                list_activities.append(value["Name_en"])
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad_1 = st.selectbox("Choose the activity",list_activities)
+            if elegir_actividad_1 == "":
+                st.stop()
+            order_activity = list_activities.index(elegir_actividad_1)
+            code = ids_activities[order_activity]
+            
+            complete_data = collection.find_one({"_id":code})
+            
+            title = st.header(complete_data["Name_en"])
+            
+            c1, c2 = st.columns(2)
+        
+            bucket_name = "peruviansunrise-storage"
+            
+            url_1 = get_link(bucket_name, complete_data["Images"])
+            
+            description = c1.write( complete_data["Description_en"])        
+            
+            c2.image(url_1, use_column_width="auto", width=400)
+            
+            
+            if st.button("Delete"):
+                with st.spinner('Deleting...'):    
+                    order_activity = list_activities.index(elegir_actividad_1)
+                    code = ids_activities[order_activity]
+                    # delete activity in mongodb
+                    
+                    collection.delete_one({"_id": ObjectId(code)})
+                    # ---
+                    # delete activity in s3
+                    title = complete_data["Name_en"]
+                    
+                    title_separate = title.replace(" ", "_")
+                    
+                    
+                    image_1 = title_separate+".png"
+                    
+                    
+                    try:
+                        delete_s3_file(bucket_name,image_1)
+                        
+                        st.success("Activity deleted")
+                    # ---
+                    except: 
+                        st.error("Error deleting images")
+                        
