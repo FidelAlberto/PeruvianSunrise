@@ -17,6 +17,5 @@ textColor = '#000000'
 # Default: "sans serif"
 font = "sans serif"
 
-# Everything in this section will be available as an environment variable 
-db_username = "AKIARCQ5LPGG77AEDJWA"
-db_password = "pQ7BuhdCKZ1mLoTJhnF++JZrYZ9dObMLbJMGl4mm"
+
+
