@@ -88,7 +88,35 @@
 # Create  steps interface in streamlit
 # https://github.com/Mohamed-512/Extra-Streamlit-Components
 #################################################### 
-import extra_streamlit_components as stx
-import streamlit as st
-val = stx.stepper_bar(steps=["Ready", "Get Set", "Go"])
-st.info(f"Phase #{val}")
+# import extra_streamlit_components as stx
+# import streamlit as st
+# val = stx.stepper_bar(steps=["Ready", "Get Set", "Go"])
+# st.info(f"Phase #{val}")
+
+
+
+
+#################################################### 
+# espacio para escribir descripciones  con opciones de formato
+# https://github.com/okld/streamlit-ace
+#################################################### 
+
+
+# import streamlit as st
+
+# from streamlit_quill import st_quill
+
+# # Spawn a new Quill editor
+# content = st_quill()
+
+# # Display editor's content as you type
+
+
+# st.write(content)
+
+
+#################################################### 
+# tabs with css
+# https://github.com/Socvest/streamlit-on-Hover-tabs
+# This works with streamlit 1.11.0 or lower
+#################################################### 

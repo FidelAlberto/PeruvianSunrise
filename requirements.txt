@@ -1,5 +1,5 @@
 pdfkit==1.0.0
-streamlit==1.10.0
+streamlit==1.15.1
 numpy==1.23.0
 pandas==1.4.3
 streamlit-lottie==0.0.3

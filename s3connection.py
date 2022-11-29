@@ -22,9 +22,6 @@ bucket_name = "peruviansunrise-storage"
 region_bucket='sa-east-1'
 S3_KEY = st.secrets["db_username"]
 S3_SECRET = st.secrets["db_password"]
-# S3_KEY =  "AKIARCQ5LPGG67G25MGI"
-# S3_SECRET = "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"
-
 
 
 
