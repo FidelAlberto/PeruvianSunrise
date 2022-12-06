@@ -1,7 +1,8 @@
 """
 
 Fidel Alberto Ramos Calachahuin
-VittaQuant Inc.
+VittaQuant Technologies.
+Peruvian Sunrise App
 Cloud Streamlit
 
 """
@@ -54,6 +55,18 @@ path_to_file = 'sample.html'
 
 
 
+############################
+# Connection to MongoDB
+############################
+
+
+# Connection to MongoDB since applicacion in streamlit cloud
+cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+# Connection to MongoDB since applicacion in local
+# cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+db = cluster["peruviansunrise"]
+
+# FIN
 
 # CREATION OF favicon
 
@@ -137,11 +150,10 @@ if "dias_6" not in st.session_state:
     
 if menu_sidebar == "Create new":
     
-
-    val = stx.stepper_bar(steps=["Fase 0", "Data", "Diseño", "Revision"])
+    
     # st.info(f"Phase #{val}")
-
     st.sidebar.selectbox("Lenguage", ["English", "Spanish", "Alemán"], index=0)
+    st.sidebar.selectbox("Type",["General", "Program with details"], index=0)
     st.sidebar.subheader("Passengers")
     adultos = st.sidebar.number_input("Personas adultas", min_value=0, max_value=50, value=1, step=1, key="adultos")
     niños = st.sidebar.number_input("Niños(a)", min_value=0, max_value=50, value=0, step=1, key="niños")
@@ -588,7 +600,7 @@ if menu_sidebar == "Create new":
         st.markdown("""---""")
         
         
-    
+    st.title("Accommodations")
     
     st.title("Pricing")
     # 
@@ -639,7 +651,7 @@ if menu_sidebar == "Create new":
     price_final = left.write(f"**The profit is  {round(precio_final-precio_total,2)} USD**")
     price_final = left.write(f"**The final price is  {precio_final} USD**")
     # submit = form.form_submit_button("Generar")
-
+    
 
 
     imagenes ={ "Lima": ["https://www.hajosiewer.de/wp-content/uploads/Paraglider-an-der-K%C3%BCste-von-Lima.jpg","https://d26gc54f207k5x.cloudfront.net/media/public/cache/800x800/2019/02/14/peru-lima-plaza.jpeg","https://d13d0f5of5vzfo.cloudfront.net/images/products/8a0092ff7b3ad211017b720ac8694fab/large_AdobeStock_107539601_lindrik_online_800x600.jpg"],
@@ -887,20 +899,6 @@ if menu_sidebar == "Data":
         }
         )
     
-    
-    
-    ############################
-    # Connection to MongoDB
-    ############################
-
-    
-    # Connection to MongoDB since applicacion in streamlit cloud
-    cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
-    # Connection to MongoDB since applicacion in local
-    # cluster = pymongo.MongoClient("mongodb://localhost:27017/")
-    db = cluster["peruviansunrise"]
-    
-    # FIN
         
     if menu == "Activities":
         
@@ -1104,7 +1102,24 @@ if menu_sidebar == "Data":
                         df_prices_3k = [x for x in df_prices_3k if str(x) != 'nan']
                         precios_kids = [df_prices_1k,df_prices_2k,df_prices_3k]
                         # st.write(precios_kids)
-                        
+                
+                st.subheader("Meals included")
+                cole1, cole2, cole3 , cole4= st.columns([1,1,1,1])
+                breakfast = cole1.checkbox('Breakfast', value=complete_data["breakfast"])
+                lunch = cole2.checkbox('Lunch', value=complete_data["lunch"])
+                dinner = cole3.checkbox('Dinner', value=complete_data["dinner"])
+                other = cole4.checkbox('Other (please describe in meal notes)', value=complete_data["other"])
+                st.subheader("Meal notes")
+                as1,as2,as3 =st.columns([1,1,1])
+                
+                notes_en = as1.text_area("English", value=complete_data["notes_en"])
+                notes_de = as2.text_area("Deutsch", value=complete_data["notes_de"])
+                notes_es = as3.text_area("Spanish", value=complete_data["notes_es"])
+                st.subheader("Internal Pricing Notes (not shown to the traveler)")
+                notes_precio = st.text_area("Internal Pricing Notes", value=complete_data["notes_precio"])
+
+            
+                
                 st.subheader("Save changes")
                 subir = st.button('Save data')
                 if subir:
@@ -1149,7 +1164,15 @@ if menu_sidebar == "Data":
                             "Images":{"1": image_1, "2": image_2, "3":image_3},
                             "Operator": operator,
                             "Email": email,
-                            "Location": locations
+                            "Location": locations,
+                            "breakfast": breakfast,
+                            "lunch": lunch,
+                            "dinner": dinner,
+                            "other": other,
+                            "notes_en": notes_en,
+                            "notes_de": notes_de,
+                            "notes_es": notes_es,
+                            "notes_precio": notes_precio
                             }
                             
                             collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
@@ -1213,7 +1236,15 @@ if menu_sidebar == "Data":
                             "Images":{"1": image_1, "2": image_2, "3":image_3},
                             "Operator": operator,
                             "Email": email,
-                            "Location": locations
+                            "Location": locations,
+                            "breakfast": breakfast,
+                            "lunch": lunch,
+                            "dinner": dinner,
+                            "other": other,
+                            "notes_en": notes_en,
+                            "notes_de": notes_de,
+                            "notes_es": notes_es,
+                            "notes_precio": notes_precio
                             }
                             
                             collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
@@ -1321,6 +1352,21 @@ if menu_sidebar == "Data":
                             # st.write(precios_kids)
 
                     
+                    st.subheader("Meals included")
+                    cole1, cole2, cole3 , cole4= st.columns([1,1,1,1])
+                    breakfast = cole1.checkbox('Breakfast')
+                    lunch = cole2.checkbox('Lunch')
+                    dinner = cole3.checkbox('Dinner')
+                    other = cole4.checkbox('Other (please describe in meal notes)')
+                    st.subheader("Meal notes")
+                    as1,as2,as3 =st.columns([1,1,1])
+                    
+                    notes_en = as1.text_area("English")
+                    notes_de = as2.text_area("Deutsch")
+                    notes_es = as3.text_area("Spanish")
+                    st.subheader("Internal Pricing Notes (not shown to the traveler)")
+                    notes_precio = st.text_area("Internal Pricing Notes")
+
                     
                     st.subheader("Upload  data")
                     subir = st.button('Save all data')
@@ -1364,7 +1410,15 @@ if menu_sidebar == "Data":
                             "Images":{"1": image_1, "2": image_2, "3":image_3},
                             "Operator": operator,
                             "Email": email,
-                            "Location": locations
+                            "Location": locations,
+                            "breakfast": breakfast,
+                            "lunch": lunch,
+                            "dinner": dinner,
+                            "other": other,
+                            "notes_en": notes_en,
+                            "notes_de": notes_de,
+                            "notes_es": notes_es,
+                            "notes_precio": notes_precio
                             }
                             
                             collection.insert_one(record)
@@ -1626,7 +1680,7 @@ if menu_sidebar == "Data":
             
             
             
-            st.subheader("Create new location")
+            st.subheader("Edit location")
             name_en = st.text_input("Name in english", complete_data["Name_en"])
             name_de = st.text_input("Name in german", complete_data["Name_de"])
             name_es = st.text_input("Name in spanish", complete_data["Name_es"])
@@ -1769,7 +1823,7 @@ if menu_sidebar == "Data":
         # fin
         opciones = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="transportation")
         if opciones == "Create new":
-            st.subheader("Create new location")
+            st.subheader("Create new transport")
             name_en = st.text_input("Name in english", key="trans_en")
             name_de = st.text_input("Name in Deutsch", key="trans_de")
             name_es = st.text_input("Name in spanish", key="trans_es")
@@ -2436,7 +2490,7 @@ if menu_sidebar == "Data":
         # opcion de editar transportation 
         #####################
         if opciones == "Edit":
-            st.subheader("Edit a location")
+            st.subheader("Edit a transport")
             # Pedir datos de mongo db para  obtener los nombres de las actividades
             collection = db["transport"]
             data = collection.find({},{"Name_en":1, "operator":1,"_id":1})
@@ -3192,7 +3246,7 @@ if menu_sidebar == "Data":
                     st.success('Upload successful!')        
         
         if opciones == "Delete":
-            st.subheader("Edit a location")
+            st.subheader("Delete a transport")
             # Pedir datos de mongo db para  obtener los nombres de las actividades
             collection = db["transport"]
             data = collection.find({},{"Name_en":1, "operator":1,"_id":1})
@@ -3217,6 +3271,267 @@ if menu_sidebar == "Data":
                     # delete activity in mongodb
                     collection.delete_one({"_id": ObjectId(code)})
                     st.info("Deleted")
+    ##################
+    # Accommodation 
+    ##################
+    
+    if menu == "Accommodations":
+        
+        opciones = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="accommodations_key")
+        if opciones == "Create new":
+            st.subheader("Create a new accommodation")
+            col1, col2 = st.columns((2,1))
+            with col1:
+                name_en = st.text_input("Name in english")
+                name_de = st.text_input("Name in deutsch")
+                name_es = st.text_input("Name in español")
+                
+                uploaded_files = st.file_uploader("Select 1 image")
+                if uploaded_files!=None:
+                    st.image(uploaded_files, use_column_width="auto",output_format="PNG")
+                    
+            with col2:
+                # lista de las locations
+                # Pedir datos de mongo db para  obtener los nombres de las actividades
+                collection_location = db["locations"]
+                data = collection_location.find({},{"Name_en":1})
+                
+                list_activities = []
+                for value in data:
+                    list_activities.append(value["Name_en"])
+                # fin
+                lugares = st.multiselect("Choose the location",list_activities)
+                lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
+                calidad = st.selectbox("Choose the hotel rating",lista)
+                estrellas = lista.index(calidad)+1
+            if st.button("Save data"):
+                with st.spinner('Saving...'):
+                    title_separate = name_en.replace(" ", "_")
+                    image_1 = title_separate+".png"
+                    
+                    collection = db["accommodations"]
+                    
+                    # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                    uploadimageToS3(uploaded_files,bucket_name , image_1)
+                    
+                    # In this section you can add new activities to the database
+                    # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
+                    
+                    record = {
+                    "Name_en": name_en,
+                    "Name_de": name_de,
+                    "Name_es": name_es,
+                    "location": lugares,
+                    "rating": estrellas,
+                    "imagen": image_1
+                    }
+                    
+                    collection.insert_one(record)
+                    st.success('Upload successful!')
+        
+        if opciones == "Edit":
             
+            st.subheader("Edit an accommodation")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["accommodations"]
+            data = collection.find({},{"Name_en":1,"_id":1})
+            
+            list_activities = [""]
+            ids_activities = [""]
+            for value in data:
+                list_activities.append(value["Name_en"])
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad = st.selectbox("Choose the transport",list_activities)
+            if elegir_actividad == "":
+                st.stop()
+            order_activity = list_activities.index(elegir_actividad)
+            code = ids_activities[order_activity]
+            complete_data = collection.find_one({"_id":code})
+            st.subheader("Change values")
+            col1, col2 = st.columns((2,1))
+            with col1:
+                name_en = st.text_input("Name in english", complete_data["Name_en"])
+                name_de = st.text_input("Name in deutsch", complete_data["Name_de"])
+                name_es = st.text_input("Name in español", complete_data["Name_es"])
+                
+                st.subheader("Image")
+                st.image(get_link(bucket_name, complete_data["imagen"]), width=500 )
+                uploaded_file = st.file_uploader("Upload new image")
+                if uploaded_file!=None:
+                    st.subheader("New image")
+                    st.image(uploaded_file, width = 500 ,output_format="PNG")
+                    
+                    
+            with col2:
+                # lista de las locations
+                # Pedir datos de mongo db para  obtener los nombres de las actividades
+                collection_location = db["locations"]
+                data = collection_location.find({},{"Name_en":1})
+                
+                list_activities = []
+                for value in data:
+                    list_activities.append(value["Name_en"])
+                # fin
+                lugares = st.multiselect("Choose the location",list_activities, default=complete_data["location"])
+                lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
+                calidad = st.selectbox("Choose the hotel rating",lista, index=complete_data["rating"]+1)
+                estrellas = lista.index(calidad)+1
+            
+            
+            
+            
+            
+            if st.button("Save"):
+                # reemplazar los espacios por guiones bajos
+                title_separate = name_en.replace(" ", "_")
+                
+                if name_en== complete_data["Name_en"]:
+                    with st.spinner('Uploading...'):
+                        
+                        image_1 = title_separate+".png"
+                        
+                        ############################
+                        # Connection to MongoDB
+                        ############################
+                        
+                        record = {
+                        "Name_en": name_en,
+                        "Name_de": name_de,
+                        "Name_es": name_es,
+                        "location": lugares,
+                        "rating": estrellas,
+                        "imagen": image_1
+                        }
+                        
+                        
+                        collection.update_one({"_id":code},{"$set":record})
+                        if uploaded_file is not None:
+                                uploadimageToS3(uploaded_file,bucket_name , image_1)
+                        st.success("Location updated")
+                
+                if name_en!= complete_data["Name_en"]:
+                    with st.spinner('Uploading...'):
+                        
+                        image_1 = title_separate+".png"
+                        
+                        ############################
+                        # Connection to MongoDB
+                        ############################
+                        
+                        record = {
+                        "Name_en": name_en,
+                        "Name_de": name_de,
+                        "Name_es": name_es,
+                        "location": lugares,
+                        "rating": estrellas,
+                        "imagen": image_1
+                        }
+                        
+                        collection.update_one({"_id":code},{"$set":record})
+                        # working with s3
+                        
+                        copy_and_delete_s3_file(bucket_name, complete_data["imagen"], image_1)
+                        delete_s3_file(bucket_name, complete_data["imagen"])
+                        
+                        # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
+                        if uploaded_file is not None:
+                            uploadimageToS3(uploaded_file,bucket_name , image_1)
+                        st.success("Location updated")
+                
+        ########################
+        # Delete a location
+        ########################
+        if opciones == "Delete":
+            st.subheader("Delete an accommodation")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["accommodations"]
+            data = collection.find({},{"Name_en":1, "_id":1})
+            names = []
+            list_activities_1 = [""]
+            ids_activities = [""]
+            for value in data:
+                names.append(value["Name_en"])
+                list_activities_1.append(value["Name_en"])
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad_1 = st.selectbox("Choose the activity",list_activities_1)
+            if elegir_actividad_1 == "":
+                st.stop()
+                
+            
+            order_activity = list_activities_1.index(elegir_actividad_1)
+            code = ids_activities[order_activity]
+            
+            complete_data = collection.find_one({"_id":code})
+            
+            title = st.header(complete_data["Name_en"])
+            
+            c1, c2 = st.columns(2)
+        
+            bucket_name = "peruviansunrise-storage"
+            
+            url_1 = get_link(bucket_name, complete_data["imagen"])
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+            # fin
+            
+            lugares = c1.multiselect("Choose the location",list_activities, default=complete_data["location"])
+            lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
+            calidad = c1.selectbox("Choose the hotel rating",lista, index=complete_data["rating"]+1)
+            c2.image(url_1, use_column_width="auto", width=400)
+            
+            
+            if st.button("Delete"):
+                with st.spinner('Deleting...'):  
+                    collection = db["accommodations"]  
+                    order_activity = list_activities_1.index(elegir_actividad_1)
+                    code = ids_activities[order_activity]
+                    # delete activity in mongodb
+                    
+                    collection.delete_one({"_id": ObjectId(code)})
+                    # ---
+                    # delete activity in s3
+                    title = complete_data["Name_en"]
+                    title_separate = title.replace(" ", "_")
+                    image_1 = title_separate+".png"
+                    try:
+                        delete_s3_file(bucket_name,image_1)
+                        
+                        st.success("Activity deleted")
+                    # ---
+                    except: 
+                        st.error("Error deleting images")
+                    
+
     if menu == "Bundle":
-        st.info("Estamos trabajando en ello")
+        activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="bundle_options")
+        if activities_option == "Create new":
+            
+            def contenedor_bundle():
+                with st.container():
+                    with st.expander("Bundle", expanded=True):
+                        col1, col2, col3 = st.columns((1,1.5,1)) 
+                        col2.header("Cusco y Lima Tour")
+                        st.subheader("Cusco city tour")
+                        st.write("""
+                            The chart above shows some numbers I picked for you.
+                            I rolled actual dice for these, so they're *guaranteed* to
+                            be random.
+                        """)
+                        st.subheader("Lima city tour")
+                        st.write("""
+                            The chart above shows some numbers I picked for you.
+                            I rolled actual dice for these, so they're *guaranteed* to
+                            be random.
+                        """)
+                        st.button("Edit")
+                        
+            contenedor_bundle()
+            contenedor_bundle()
+            contenedor_bundle()
