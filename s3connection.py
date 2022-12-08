@@ -20,11 +20,8 @@ import requests
 # Iam using the account IAM ""
 bucket_name = "peruviansunrise-storage"
 region_bucket='sa-east-1'
-# S3_KEY = st.secrets["db_username"]
-# S3_SECRET = st.secrets["db_password"]
-
-S3_KEY = "AKIARCQ5LPGGXYOEXLWC"
-S3_SECRET = "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"
+S3_KEY = st.secrets["db_username"]
+S3_SECRET = st.secrets["db_password"]
 
 # connect to s3 service and download a file from S3 bucket
 def get_link(bucket_name, object_name, expiration=3600):

@@ -61,9 +61,9 @@ path_to_file = 'sample.html'
 
 
 # Connection to MongoDB since applicacion in streamlit cloud
-# cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
 # Connection to MongoDB since applicacion in local
-cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+# cluster = pymongo.MongoClient("mongodb://localhost:27017/")
 db = cluster["peruviansunrise"]
 
 # FIN
@@ -912,7 +912,7 @@ if menu_sidebar == "Data":
             list_activities = [""]
             ids_activities = [""]
             for value in data:
-                list_activities.append(value["Name_en"] + "(" + value["Operator"]+ ")")
+                list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
                 ids_activities.append(value["_id"])
             # FIN 
             elegir_actividad = st.selectbox("Choose the activity",list_activities)
@@ -1825,8 +1825,6 @@ if menu_sidebar == "Data":
         if opciones == "Create new":
             st.subheader("Create new transport")
             name_en = st.text_input("Name in english", key="trans_en")
-            name_de = st.text_input("Name in Deutsch", key="trans_de")
-            name_es = st.text_input("Name in spanish", key="trans_es")
             # You can call any Streamlit command, including custom components:
             if "option1a" not in st.session_state:
                 st.session_state["option1a"] = ""
@@ -2395,8 +2393,6 @@ if menu_sidebar == "Data":
                     
                     record = {
                     "Name_en": name_en,
-                    "Name_de": name_de,
-                    "Name_es": name_es,
                     "route1": [st.session_state["option"+str(data_final[0])+"a"],st.session_state["option"+str(data_final[0])+"b"], st.session_state["descrip_"+str(data_final[0])+"_en"],st.session_state["descrip_"+str(data_final[0])+"_de"] , st.session_state["descrip_"+str(data_final[0])+"_es"]], 
                     "route2": [st.session_state["option"+str(data_final[1])+"a"],st.session_state["option"+str(data_final[1])+"b"], st.session_state["descrip_"+str(data_final[1])+"_en"],st.session_state["descrip_"+str(data_final[1])+"_de"] , st.session_state["descrip_"+str(data_final[1])+"_es"]], 
                     "route3": [st.session_state["option"+str(data_final[2])+"a"],st.session_state["option"+str(data_final[2])+"b"], st.session_state["descrip_"+str(data_final[2])+"_en"],st.session_state["descrip_"+str(data_final[2])+"_de"] , st.session_state["descrip_"+str(data_final[2])+"_es"]], 
@@ -2509,8 +2505,7 @@ if menu_sidebar == "Data":
             complete_data = collection.find_one({"_id":code})
             
             name_en = st.text_input("Name in english",complete_data["Name_en"] , key="trans_en")
-            name_de = st.text_input("Name in Deutsch",complete_data["Name_de"], key="trans_de")
-            name_es = st.text_input("Name in spanish",complete_data["Name_es"], key="trans_es")
+            
             # You can call any Streamlit command, including custom components:
             # You can call any Streamlit command, including custom components:
             if "option1a" not in st.session_state:
@@ -3154,6 +3149,7 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Name_en": name_en,
                     "route1": [st.session_state["option"+str(data_final[0])+"a"],st.session_state["option"+str(data_final[0])+"b"], st.session_state["descrip_"+str(data_final[0])+"_en"],st.session_state["descrip_"+str(data_final[0])+"_de"] , st.session_state["descrip_"+str(data_final[0])+"_es"]], 
                     "route2": [st.session_state["option"+str(data_final[1])+"a"],st.session_state["option"+str(data_final[1])+"b"], st.session_state["descrip_"+str(data_final[1])+"_en"],st.session_state["descrip_"+str(data_final[1])+"_de"] , st.session_state["descrip_"+str(data_final[1])+"_es"]], 
                     "route3": [st.session_state["option"+str(data_final[2])+"a"],st.session_state["option"+str(data_final[2])+"b"], st.session_state["descrip_"+str(data_final[2])+"_en"],st.session_state["descrip_"+str(data_final[2])+"_de"] , st.session_state["descrip_"+str(data_final[2])+"_es"]], 
@@ -3375,7 +3371,7 @@ if menu_sidebar == "Data":
                 # fin
                 lugares = st.multiselect("Choose the location",list_activities, default=complete_data["location"])
                 lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
-                calidad = st.selectbox("Choose the hotel rating",lista, index=complete_data["rating"]+1)
+                calidad = st.selectbox("Choose the hotel rating",lista, index=complete_data["rating"])
                 estrellas = lista.index(calidad)+1
             
             
@@ -3483,7 +3479,7 @@ if menu_sidebar == "Data":
             
             lugares = c1.multiselect("Choose the location",list_activities, default=complete_data["location"])
             lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
-            calidad = c1.selectbox("Choose the hotel rating",lista, index=complete_data["rating"]+1)
+            calidad = c1.selectbox("Choose the hotel rating",lista, index=complete_data["rating"])
             c2.image(url_1, use_column_width="auto", width=400)
             
             
@@ -3512,7 +3508,519 @@ if menu_sidebar == "Data":
     if menu == "Bundle":
         activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="bundle_options")
         if activities_option == "Create new":
+            st.stop()
+            st.subheader("Create a new bundle")
+            st.text_input("Bundle name")
+
+            # You can call any Streamlit command, including custom components:
+            if "option1a" not in st.session_state:
+                st.session_state["option1a"] = ""
+            if "option2a" not in st.session_state:
+                st.session_state["option2a"] = ""
+            if "option3a" not in st.session_state:
+                st.session_state["option3a"] = ""
+            if "option4a" not in st.session_state:
+                st.session_state["option4a"] = ""
+            if "option5a" not in st.session_state:
+                st.session_state["option5a"] = ""
+            if "option6a" not in st.session_state:
+                st.session_state["option6a"] = ""
+            if "option7a" not in st.session_state:
+                st.session_state["option7a"] = ""
+            if "option8a" not in st.session_state:
+                st.session_state["option8a"] = ""
+            if "option9a" not in st.session_state:
+                st.session_state["option9a"] = ""
+            if "option10a" not in st.session_state:
+                st.session_state["option10a"] = ""
+                
+            if "option1b" not in st.session_state:
+                st.session_state["option1b"] = ""
+            if "option2b" not in st.session_state:
+                st.session_state["option2b"] = ""
+            if "option3b" not in st.session_state:
+                st.session_state["option3b"] = ""
+            if "option4b" not in st.session_state:
+                st.session_state["option4b"] = ""
+            if "option5b" not in st.session_state:
+                st.session_state["option5b"] = ""
+            if "option6b" not in st.session_state:
+                st.session_state["option6b"] = ""
+            if "option7b" not in st.session_state:
+                st.session_state["option7b"] = ""
+            if "option8b" not in st.session_state:
+                st.session_state["option8b"] = ""
+            if "option9b" not in st.session_state:
+                st.session_state["option9b"] = ""
+            if "option10b" not in st.session_state:
+                st.session_state["option10b"] = ""
+                
+            if "descrip_1_en" not in st.session_state:
+                st.session_state["descrip_1_en"] = ""
+                st.session_state["descrip_1_de"] = ""
+                st.session_state["descrip_1_es"] = ""
+            if "descrip_2_en" not in st.session_state:
+                st.session_state["descrip_2_en"] = ""
+                st.session_state["descrip_2_de"] = ""
+                st.session_state["descrip_2_es"] = ""
+            if "descrip_3_en" not in st.session_state:
+                st.session_state["descrip_3_en"] = ""
+                st.session_state["descrip_3_de"] = ""
+                st.session_state["descrip_3_es"] = ""
+            if "descrip_4_en" not in st.session_state:
+                st.session_state["descrip_4_en"] = ""
+                st.session_state["descrip_4_de"] = ""
+                st.session_state["descrip_4_es"] = ""
+            if "descrip_5_en" not in st.session_state:
+                st.session_state["descrip_5_en"] = ""
+                st.session_state["descrip_5_de"] = ""
+                st.session_state["descrip_5_es"] = ""
+            if "descrip_6_en" not in st.session_state:
+                st.session_state["descrip_6_en"] = ""
+                st.session_state["descrip_6_de"] = ""
+                st.session_state["descrip_6_es"] = ""
+            if "descrip_7_en" not in st.session_state:
+                st.session_state["descrip_7_en"] = ""
+                st.session_state["descrip_7_de"] = ""
+                st.session_state["descrip_7_es"] = ""
+            if "descrip_8_en" not in st.session_state:
+                st.session_state["descrip_8_en"] = ""
+                st.session_state["descrip_8_de"] = ""
+                st.session_state["descrip_8_es"] = ""
+            if "descrip_9_en" not in st.session_state:
+                st.session_state["descrip_9_en"] = ""
+                st.session_state["descrip_9_de"] = ""
+                st.session_state["descrip_9_es"] = ""
+            if "descrip_10_en" not in st.session_state:
+                st.session_state["descrip_10_en"] = ""
+                st.session_state["descrip_10_de"] = ""
+                st.session_state["descrip_10_es"] = ""
             
+            # funcion para pedir todos los datos
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            def data_complete():
+                #! Pedir data de activities
+                collection = db["activities"]
+                data = collection.find({},{"Name_en":1, "Operator":1,"_id":1})
+                
+                list_activities = [""]
+                ids_activities = [""]
+
+                for value in data:
+                    list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
+                    ids_activities.append(value["_id"])
+                #! Pedir data de transport
+                collection = db["transport"]
+                data = collection.find({},{"Name_en":1, "operator":1,"_id":1})
+                for value in data:
+                    list_activities.append(value["Name_en"] + " (" + value["operator"]+ ")")
+                    ids_activities.append(value["_id"])
+                #! Pedir data de accommodations
+                collection = db["accommodations"]
+                data = collection.find({},{"Name_en":1, "rating":1,"_id":1})
+                for value in data:
+                    list_activities.append(value["Name_en"] + " (" + value["rating"]+ ")")
+                    ids_activities.append(value["_id"])
+
+                return list_activities, ids_activities
+            # FIN 
+            
+            
+            # order_activity = list_activities.index(elegir_actividad)
+            # code = ids_activities[order_activity]
+            # complete_data = collection.find_one({"_id":code})
+            
+            with st.expander("Location", expanded=True):
+                c1, c2 = st.columns((2,5))
+                slider_number = c1.number_input("Add", 1, 10)
+                
+                # it's needed this 2 lines of code to run a lottie animation
+                link = "https://assets3.lottiefiles.com/packages/lf20_q6dNvPXDCZ.json"
+                lottie_json = load_lottieurl(link)
+                # fin
+                
+                # crear las variables para la eliminación de  las rutas 
+                if "route_1" not in st.session_state: 
+                    st.session_state['route_1'] = False
+                if "route_2" not in st.session_state: 
+                    st.session_state['route_2'] = False
+                if "route_3" not in st.session_state: 
+                    st.session_state['route_3'] = False
+                if "route_4" not in st.session_state: 
+                    st.session_state['route_4'] = False
+                if "route_5" not in st.session_state: 
+                    st.session_state['route_5'] = False
+                if "route_6" not in st.session_state: 
+                    st.session_state['route_6'] = False
+                if "route_7" not in st.session_state: 
+                    st.session_state['route_7'] = False
+                if "route_8" not in st.session_state: 
+                    st.session_state['route_8'] = False
+                if "route_9" not in st.session_state: 
+                    st.session_state['route_9'] = False
+                if "route_10" not in st.session_state: 
+                    st.session_state['route_10'] = False
+                
+                value=15
+                for x in range(1,11):
+                    if st.session_state["route_"+str(x)] == False:
+                        value = x
+                    x+=1
+                
+                
+                route1 = st.empty()   
+                route2 = st.empty()   
+                route3 = st.empty()  
+                route4 = st.empty()   
+                route5 = st.empty()   
+                route6 = st.empty()   
+                route7 = st.empty()  
+                route8 = st.empty()   
+                route9 = st.empty()   
+                route10 = st.empty() 
+                
+                if slider_number >= 1:
+                    with route1.container():
+                        col1a,col3a, col4a= st.columns([2,2,1])
+                        with col1a:
+                            salida_1 = st.selectbox("Origin",list_activities, key="salida_1")
+                            st.session_state['option1a'] = salida_1
+                        
+                        with col3a:
+                            dias_1 = st.selectbox("Destination",list_activities, key="llegada_1")
+                            st.session_state['option1b'] = dias_1
+                        with col4a:
+                            st.markdown("Delete")
+                            but = st.button("Delete", key="delete_1")
+                            if but:
+                                st.session_state['route_1'] = True
+                                
+                    if st.session_state["route_1"]:
+                        st.session_state["option1a"] = ""
+                        st.session_state["option1b"] = ""
+                        route1.empty()
+                        
+                if slider_number >= 2:
+                    with route2.container():
+                        col1b,col2b,col3b, col4b= st.columns([2,2,2,1])
+                        with col1b:
+                            salida_2 = st.selectbox("Origin",list_activities, key="salida_2")
+                            st.session_state['option2a'] = salida_2
+                        with col2b:
+                            st_lottie(lottie_json, height=70 , key="2_lottie", reverse=False )
+                        with col3b:
+                            dias_2 = st.selectbox("Destination",list_activities, key="llegada_2")
+                            st.session_state['option2b'] = dias_2
+                        with col4b:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_2"):
+                                st.session_state['route_2'] = True
+                    if st.session_state["route_2"]:
+                        st.session_state["option2a"] = ""
+                        st.session_state["option2b"] = ""
+                        route2.empty()
+                if slider_number >= 3:
+                    with route3.container():
+                        col1c,col2c,col3c, col4c= st.columns([2,2,2,1])
+                        with col1c:
+                            salida_3 = st.selectbox("Origin",list_activities, key="salida_3")
+                            st.session_state['option3a'] = salida_3
+                        with col2c:
+                            st_lottie(lottie_json, height=70 , key="3_lottie", reverse=False )
+                        with col3c:
+                            dias_3 = st.selectbox("Destination",list_activities, key="llegada_3")
+                            st.session_state['option3b'] = dias_3
+                        with col4c:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_3"):
+                                st.session_state['route_3'] = True
+                    if st.session_state["route_3"]:
+                        st.session_state["option3a"] = ""
+                        st.session_state["option3b"] = ""
+                        route3.empty()
+                if slider_number >= 4:
+                    with route4.container():
+                        col1d,col2d,col3d, col4d= st.columns([2,2,2,1])
+                        with col1d:
+                            salida_4 = st.selectbox("Origin",list_activities, key="salida_4")
+                            st.session_state['option4a'] = salida_4
+                        with col2d:
+                            st_lottie(lottie_json, height=70 , key="4_lottie", reverse=False )
+                        with col3d:
+                            dias_4 = st.selectbox("Destination",list_activities, key="llegada_4")
+                            st.session_state['option4b'] = dias_4
+                        with col4d:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_4"):
+                                st.session_state['route_4'] = True
+                    if st.session_state["route_4"]:
+                        st.session_state["option4a"] = ""
+                        st.session_state["option4b"] = ""
+                        route4.empty()  
+                if slider_number >= 5:
+                    with route5.container():
+                        col1e,col2e,col3e, col4e= st.columns([2,2,2,1])
+                        with col1e:
+                            salida_5 = st.selectbox("Origin",list_activities, key="salida_5")
+                            st.session_state['option5a'] = salida_5
+                        with col2e:
+                            st_lottie(lottie_json, height=70 , key="5_lottie", reverse=False )
+                        with col3e:
+                            dias_5 = st.selectbox("Destination",list_activities, key="llegada_5")
+                            st.session_state['option5b'] = dias_5
+                        with col4e:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_5"):
+                                st.session_state['route_5'] = True
+                    if st.session_state["route_5"]:
+                        st.session_state["option5a"] = ""
+                        st.session_state["option5b"] = ""
+                        route5.empty() 
+                if slider_number >= 6:
+                    with route6.container():
+                        col1f,col2f,col3f, col4f= st.columns([2,2,2,1])
+                        with col1f:
+                            salida_6 = st.selectbox("Origin",list_activities, key="salida_6")
+                            st.session_state['option6a'] = salida_6
+                        with col2f:
+                            st_lottie(lottie_json, height=70 , key="6_lottie", reverse=False )
+                        with col3f:
+                            dias_6 = st.selectbox("Destination",list_activities, key="llegada_6")
+                            st.session_state['option6b'] = dias_6
+                        with col4f:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_6"):
+                                st.session_state['route_6'] = True
+                    if st.session_state["route_6"]:
+                        st.session_state["option6a"] = ""
+                        st.session_state["option6b"] = ""
+                        route6.empty() 
+                if slider_number >= 7:
+                    with route7.container():
+                        col1g,col2g,col3g, col4g= st.columns([2,2,2,1])
+                        with col1g:
+                            salida_7 = st.selectbox("Origin",list_activities, key="salida_7")
+                            st.session_state['option7a'] = salida_7
+                        with col2g:
+                            st_lottie(lottie_json, height=70 , key="7_lottie", reverse=False )
+                        with col3g:
+                            dias_7 = st.selectbox("Destination",list_activities, key="llegada_7")
+                            st.session_state['option7b'] = dias_7
+                        with col4g:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_7"):
+                                st.session_state['route_7'] = True
+                    if st.session_state["route_7"]:
+                        st.session_state["option7a"] = ""
+                        st.session_state["option7b"] = ""
+                        route7.empty() 
+                if slider_number >= 8:
+                    with route8.container():
+                        col1h,col2h,col3h, col4h= st.columns([2,2,2,1])
+                        with col1h:
+                            salida_8 = st.selectbox("Origin",list_activities, key="salida_8")
+                            st.session_state['option8a'] = salida_8
+                        with col2h:
+                            st_lottie(lottie_json, height=70 , key="8_lottie", reverse=False )
+                        with col3h:
+                            dias_8 = st.selectbox("Destination",list_activities, key="llegada_8")
+                            st.session_state['option8b'] = dias_8
+                        with col4h:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_8"):
+                                st.session_state['route_8'] = True
+                    if st.session_state["route_8"]:
+                        st.session_state["option8a"] = ""
+                        st.session_state["option8b"] = ""
+                        route8.empty() 
+                if slider_number >= 9:
+                    with route9.container():
+                        col1i,col2i,col3i, col4i= st.columns([2,2,2,1])
+                        with col1i:
+                            salida_9 = st.selectbox("Origin",list_activities, key="salida_9")
+                            st.session_state['option9a'] = salida_9
+                        with col2i:
+                            st_lottie(lottie_json, height=70 , key="9_lottie", reverse=False )
+                        with col3i:
+                            dias_9 = st.selectbox("Destination",list_activities, key="llegada_9")
+                            st.session_state['option9b'] = dias_9
+                        with col4i:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_9"):
+                                st.session_state['route_9'] = True
+                    if st.session_state["route_9"]:
+                        st.session_state["option9a"] = ""
+                        st.session_state["option9b"] = ""
+                        route9.empty() 
+                if slider_number >= 10:
+                    with route10.container():
+                        col1j,col2j,col3j, col4j= st.columns([2,2,2,1])
+                        with col1j:
+                            salida_10 = st.selectbox("Origin",list_activities, key="salida_10")
+                            st.session_state['option10a'] = salida_10
+                        with col2j:
+                            st_lottie(lottie_json, height=70 , key="10_lottie", reverse=False )
+                        with col3j:
+                            dias_10 = st.selectbox("Destination",list_activities, key="llegada_10")
+                            st.session_state['option10b'] = dias_10
+                        with col4j:
+                            st.markdown("Delete")
+                            if st.button("Delete", key="delete_10"):
+                                st.session_state['route_10'] = True
+                    if st.session_state["route_10"]:
+                        st.session_state["option10a"] = ""
+                        st.session_state["option10b"] = ""
+                        route10.empty()
+
+            # creation of description of the route
+            if slider_number >= 1 and st.session_state["route_1"] == False:
+                st.subheader("Description "+st.session_state['option1a']+" to "+st.session_state['option1b'])
+                with st.container():
+                    coli1, coli2, coli3 =st.columns([1,1,1])
+                    st.session_state.descrip_1_en = coli1.text_area("English", key="descrip_1_enx")
+                    st.session_state.descrip_1_de = coli2.text_area("Deutsch", key="descrip_1_dex")
+                    st.session_state.descrip_1_es = coli3.text_area("Spanish", key="descrip_1_esx")
+            if  st.session_state["route_1"] != False:
+                st.session_state.descrip_1_en = ""
+                st.session_state.descrip_1_de = ""
+                st.session_state.descrip_1_es = ""
+                
+            if slider_number >= 2 and st.session_state["route_2"] == False:
+                st.subheader("Description "+st.session_state['option2a']+" to "+st.session_state['option2b'])
+                with st.container():
+                    coli1a, coli2a, coli3a =st.columns([1,1,1])
+                    st.session_state.descrip_2_en = coli1a.text_area("English", key="descrip_2_enx")
+                    st.session_state.descrip_2_de = coli2a.text_area("Deutsch", key="descrip_2_dex")
+                    st.session_state.descrip_2_es = coli3a.text_area("Spanish", key="descrip_2_esx")
+            if  st.session_state["route_2"] != False:
+                st.session_state.descrip_2_en = ""
+                st.session_state.descrip_2_de = ""
+                st.session_state.descrip_2_es = ""
+                
+            if slider_number >= 3 and st.session_state["route_3"] == False:
+                st.subheader("Description "+st.session_state['option3a']+" to "+st.session_state['option3b'])
+                with st.container():
+                    coli1b, coli2b, coli3b =st.columns([1,1,1])
+                    st.session_state.descrip_3_en = coli1b.text_area("English", key="descrip_3_enx")
+                    st.session_state.descrip_3_de = coli2b.text_area("Deutsch", key="descrip_3_dex")
+                    st.session_state.descrip_3_es = coli3b.text_area("Spanish", key="descrip_3_esx")
+            if  st.session_state["route_3"] != False:
+                st.session_state.descrip_3_en = ""
+                st.session_state.descrip_3_de = ""
+                st.session_state.descrip_3_es = ""
+                
+            if slider_number >= 4 and st.session_state["route_4"] == False:
+                st.subheader("Description "+st.session_state['option4a']+" to "+st.session_state['option4b'])
+                with st.container():
+                    coli1c, coli2c, coli3c =st.columns([1,1,1])
+                    st.session_state.descrip_4_en = coli1c.text_area("English", key="descrip_4_enx")
+                    st.session_state.descrip_4_de = coli2c.text_area("Deutsch", key="descrip_4_dex")
+                    st.session_state.descrip_4_es = coli3c.text_area("Spanish", key="descrip_4_esx")
+            if  st.session_state["route_4"] != False:
+                st.session_state.descrip_4_en = ""
+                st.session_state.descrip_4_de = ""
+                st.session_state.descrip_4_es = ""
+                
+            if slider_number >= 5 and st.session_state["route_5"] == False:
+                st.subheader("Description "+st.session_state['option5a']+" to "+st.session_state['option5b'])
+                with st.container():
+                    coli1d, coli2d, coli3d =st.columns([1,1,1])
+                    st.session_state.descrip_5_en = coli1d.text_area("English", key="descrip_5_enx")
+                    st.session_state.descrip_5_de = coli2d.text_area("Deutsch", key="descrip_5_dex")
+                    st.session_state.descrip_5_es = coli3d.text_area("Spanish", key="descrip_5_esx")      
+            if  st.session_state["route_5"] != False:
+                st.session_state.descrip_5_en = ""
+                st.session_state.descrip_5_de = ""
+                st.session_state.descrip_5_es = ""
+                
+            if slider_number >= 6 and st.session_state["route_6"] == False:
+                st.subheader("Description "+st.session_state['option6a']+" to "+st.session_state['option6b'])
+                with st.container():
+                    coli1e, coli2e, coli3e =st.columns([1,1,1])
+                    st.session_state.descrip_6_en = coli1e.text_area("English", key="descrip_6_enx")
+                    st.session_state.descrip_6_de = coli2e.text_area("Deutsch", key="descrip_6_dex")
+                    st.session_state.descrip_6_es = coli3e.text_area("Spanish", key="descrip_6_esx")  
+            if  st.session_state["route_6"] != False:
+                st.session_state.descrip_6_en = ""
+                st.session_state.descrip_6_de = ""
+                st.session_state.descrip_6_es = ""
+                
+            if slider_number >= 7 and st.session_state["route_7"] == False:
+                st.subheader("Description "+st.session_state['option7a']+" to "+st.session_state['option7b'])
+                with st.container():
+                    coli1f, coli2f, coli3f =st.columns([1,1,1])
+                    st.session_state.descrip_7_en = coli1f.text_area("English", key="descrip_7_enx")
+                    st.session_state.descrip_7_de = coli2f.text_area("Deutsch", key="descrip_7_dex")
+                    st.session_state.descrip_7_es = coli3f.text_area("Spanish", key="descrip_7_esx")  
+            if  st.session_state["route_7"] != False:
+                st.session_state.descrip_7_en = ""
+                st.session_state.descrip_7_de = ""
+                st.session_state.descrip_7_es = ""
+                
+            if slider_number >= 8 and st.session_state["route_8"] == False:
+                st.subheader("Description "+st.session_state['option8a']+" to "+st.session_state['option8b'])
+                with st.container():
+                    coli1g, coli2g, coli3g =st.columns([1,1,1])
+                    st.session_state.descrip_8_en = coli1g.text_area("English", key="descrip_8_enx")
+                    st.session_state.descrip_8_de = coli2g.text_area("Deutsch", key="descrip_8_dex")
+                    st.session_state.descrip_8_es = coli3g.text_area("Spanish", key="descrip_8_esx")  
+            if  st.session_state["route_8"] != False:
+                st.session_state.descrip_8_en = ""
+                st.session_state.descrip_8_de = ""
+                st.session_state.descrip_8_es = ""
+                
+            if slider_number >= 9 and st.session_state["route_9"] == False:
+                st.subheader("Description "+st.session_state['option9a']+" to "+st.session_state['option9b'])
+                with st.container():
+                    coli1h, coli2h, coli3h =st.columns([1,1,1])
+                    st.session_state.descrip_9_en = coli1h.text_area("English", key="descrip_9_enx")
+                    st.session_state.descrip_9_de = coli2h.text_area("Deutsch", key="descrip_9_dex")
+                    st.session_state.descrip_9_es = coli3h.text_area("Spanish", key="descrip_9_esx")  
+            if  st.session_state["route_9"] != False:
+                st.session_state.descrip_9_en = ""
+                st.session_state.descrip_9_de = ""
+                st.session_state.descrip_9_es = ""
+                
+            if slider_number >= 10 and st.session_state["route_10"] == False:
+                st.subheader("Description "+st.session_state['option10a']+" to "+st.session_state['option10b'])
+                with st.container():
+                    coli1i, coli2i, coli3i =st.columns([1,1,1])
+                    st.session_state.descrip_10_en = coli1i.text_area("English", key="descrip_10_enx")
+                    st.session_state.descrip_10_de = coli2i.text_area("Deutsch", key="descrip_10_dex")
+                    st.session_state.descrip_10_es = coli3i.text_area("Spanish", key="descrip_10_esx")  
+            if  st.session_state["route_10"] != False:
+                st.session_state.descrip_10_en = ""
+                st.session_state.descrip_10_de = ""
+                st.session_state.descrip_10_es = ""
+
+
+
+
+
+
+        if activities_option=="Edit":
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["accommodations"]
+            data = collection.find({},{"Name_en":1, "_id":1})
+            names = []
+            list_activities_1 = [""]
+            ids_activities = [""]
+            for value in data:
+                names.append(value["Name_en"])
+                list_activities_1.append(value["Name_en"])
+                ids_activities.append(value["_id"])
+            # FIN 
+            elegir_actividad_1 = st.selectbox("Choose the activity",list_activities_1)
+            if elegir_actividad_1 == "":
+                st.stop()
+                
+            
+            order_activity = list_activities_1.index(elegir_actividad_1)
+            code = ids_activities[order_activity]
+            
+            complete_data = collection.find_one({"_id":code})
+
+        if activities_option=="Delete":
             def contenedor_bundle():
                 with st.container():
                     with st.expander("Bundle", expanded=True):
@@ -3533,5 +4041,4 @@ if menu_sidebar == "Data":
                         st.button("Edit")
                         
             contenedor_bundle()
-            contenedor_bundle()
-            contenedor_bundle()
+            
