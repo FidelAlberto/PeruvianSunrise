@@ -7,6 +7,24 @@ Cloud Streamlit
 
 """
 
+
+# Import libraries to streamlit-pydantic
+# https://github.com/gerardrbentley/streamlit-random/blob/main/pdf_merge_and_split.py
+
+
+import tempfile
+from datetime import datetime
+from io import BytesIO
+from pathlib import Path
+import streamlit as st
+import streamlit_pydantic as sp
+from typing import Optional, List
+from streamlit_pydantic.types import FileContent
+from pydantic import BaseModel, Field
+from PyPDF2 import PdfFileWriter, PdfFileReader
+import base64
+
+#FIN
 from s3connection import uploadimageToS3
 from s3connection import get_link
 from s3connection import delete_s3_file
@@ -61,9 +79,9 @@ path_to_file = 'sample.html'
 
 
 # Connection to MongoDB since applicacion in streamlit cloud
-cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+# cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
 # Connection to MongoDB since applicacion in local
-# cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+cluster = pymongo.MongoClient("mongodb://localhost:27017/")
 db = cluster["peruviansunrise"]
 
 # FIN
@@ -74,19 +92,25 @@ st.set_page_config(layout="wide",#"centered",
     page_icon="🗽",
     page_title="Peruvian Sunrise")
 
-hide_menu="""
-<style>
-MainMenu {
-    visibility:hidden;
-}
-footer
-{
-    visibility:hidden;
-}
-</style>
-"""
+streamlit_style = """
+			<style>
+			@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap');
 
-st.markdown(hide_menu , unsafe_allow_html=True)
+			html, body, [class*="css"]  {
+			font-family: 'Roboto', sans-serif;
+			}
+            MainMenu {
+            visibility:hidden;
+            }
+
+            footer
+            {
+                visibility:hidden;
+            }
+			</style>
+			"""
+st.markdown(streamlit_style, unsafe_allow_html=True)
+
 
 # defining function to load lottie animation
 def load_lottieurl(url: str):
@@ -191,7 +215,7 @@ if menu_sidebar == "Create new":
             fit_columns_on_grid_load=True,
             allow_unsafe_jscode=True,
             enable_enterprise_modules=True,
-            theme = "alpine"  # or "streamlit","alpine","balham","material"
+            theme = "light"  # or ['streamlit', 'light', 'dark', 'blue', 'fresh', 'material']
         )
         
         # response = AgGrid(df_template, editable=True, fit_columns_on_grid_load=True)
@@ -651,7 +675,10 @@ if menu_sidebar == "Create new":
     price_final = left.write(f"**The profit is  {round(precio_final-precio_total,2)} USD**")
     price_final = left.write(f"**The final price is  {precio_final} USD**")
     # submit = form.form_submit_button("Generar")
+
     
+
+
 
 
     imagenes ={ "Lima": ["https://www.hajosiewer.de/wp-content/uploads/Paraglider-an-der-K%C3%BCste-von-Lima.jpg","https://d26gc54f207k5x.cloudfront.net/media/public/cache/800x800/2019/02/14/peru-lima-plaza.jpeg","https://d13d0f5of5vzfo.cloudfront.net/images/products/8a0092ff7b3ad211017b720ac8694fab/large_AdobeStock_107539601_lindrik_online_800x600.jpg"],
@@ -663,6 +690,7 @@ if menu_sidebar == "Create new":
     
     
     env = Environment(loader=FileSystemLoader("."), autoescape=select_autoescape())
+    
 
     if st.button("Generar"):
         if cantidad == 1:
@@ -670,6 +698,7 @@ if menu_sidebar == "Create new":
             html = template.render(
                 student=student,
                 a=a,
+                gatitos = content,
                 imag_1a = imagenes[a][0],
                 imag_2a = imagenes[a][1],
                 imag_3a = imagenes[a][2],
@@ -851,11 +880,11 @@ if menu_sidebar == "Create new":
             
             
         # 2 rows  DELETE  to work in Windows-------------------
-        # config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
-        # pdf=pdfkit.from_string(html, False, configuration=config)
+        config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
+        pdf=pdfkit.from_string(html, False, configuration=config, css='sample.css')
         
         # 1 row  to put the app in cloud ----------------------
-        pdf = pdfkit.from_string(html, False, css='sample.css')
+        #pdf = pdfkit.from_string(html, False, css='sample.css')
         #Point pdfkit configuration to wkhtmltopdf.exe
         # config = pdfkit.configuration(wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")
         # pdf = pdfkit.from_string(html, False, configuration=config, css='sample.css')
@@ -1052,7 +1081,7 @@ if menu_sidebar == "Data":
                             gridOptions=go_k, 
                             # height=300, 
                             fit_columns_on_grid_load=True,
-                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                            theme= "light" # or "streamlit","light","balham","material"
                         )
                         # st.subheader("Returned Data")
                         # st.dataframe(ag_k['data'])
@@ -1086,7 +1115,7 @@ if menu_sidebar == "Data":
                             gridOptions=go_k, 
                             # height=300, 
                             fit_columns_on_grid_load=True,
-                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                            theme= "light" # or "streamlit","light","balham","material"
                         )
                         # st.subheader("Returned Data")
                         # st.dataframe(ag_k['data'])
@@ -1334,7 +1363,7 @@ if menu_sidebar == "Data":
                                 gridOptions=go_k, 
                                 # height=300, 
                                 fit_columns_on_grid_load=True,
-                                theme= "alpine" # or "streamlit","alpine","balham","material"
+                                theme= "light" # or "streamlit","light","balham","material"
                             )
                             # st.subheader("Returned Data")
                             # st.dataframe(ag_k['data'])
@@ -1530,7 +1559,7 @@ if menu_sidebar == "Data":
                             gridOptions=go_k, 
                             # height=300, 
                             fit_columns_on_grid_load=True,
-                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                            theme= "light" # or "streamlit","light","balham","material"
                         )
                         # st.subheader("Returned Data")
                         # st.dataframe(ag_k['data'])
@@ -1564,7 +1593,7 @@ if menu_sidebar == "Data":
                             gridOptions=go_k, 
                             # height=300, 
                             fit_columns_on_grid_load=True,
-                            theme= "alpine" # or "streamlit","alpine","balham","material"
+                            theme= "light" # or "streamlit","light","balham","material"
                         )
                         # st.subheader("Returned Data")
                         # st.dataframe(ag_k['data'])
@@ -2335,7 +2364,7 @@ if menu_sidebar == "Data":
                         gridOptions=go_k, 
                         # height=300, 
                         fit_columns_on_grid_load=True,
-                        theme= "alpine" # or "streamlit","alpine","balham","material"
+                        theme= "light" # or "streamlit","light","balham","material"
                     )
                     # st.subheader("Returned Data")
                     # st.dataframe(ag_k['data'])
@@ -3058,7 +3087,7 @@ if menu_sidebar == "Data":
                         gridOptions=go_k, 
                         # height=300, 
                         fit_columns_on_grid_load=True,
-                        theme= "alpine" # or "streamlit","alpine","balham","material"
+                        theme= "light" # or "streamlit","light","balham","material"
                     )
                     # st.subheader("Returned Data")
                     # st.dataframe(ag_k['data'])
@@ -3092,7 +3121,7 @@ if menu_sidebar == "Data":
                         gridOptions=go_k, 
                         # height=300, 
                         fit_columns_on_grid_load=True,
-                        theme= "alpine" # or "streamlit","alpine","balham","material"
+                        theme= "light" # or "streamlit","light","balham","material"
                     )
                     # st.subheader("Returned Data")
                     # st.dataframe(ag_k['data'])
@@ -3276,15 +3305,56 @@ if menu_sidebar == "Data":
         opciones = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="accommodations_key")
         if opciones == "Create new":
             st.subheader("Create a new accommodation")
-            col1, col2 = st.columns((2,1))
+            col1, col2 = st.columns((1.5,1))
             with col1:
                 name_en = st.text_input("Name in english")
                 name_de = st.text_input("Name in deutsch")
                 name_es = st.text_input("Name in español")
                 
+                # Put the prices
+                @st.cache()
+                def get_data():
+                    incluir = np.arange(1)
+                    values = [0]*(1)
+                    df = pd.DataFrame(
+                        {"Single": incluir,"Double":values,"Triple":values}
+                    )
+                    return df
+                
+                precios_kids = False
+                st.subheader("Prices")
+                st.markdown('* These prices are for a maximum of 3 people per room and per night')
+                st.markdown('* Also this prices are just optional, you can change them later')
+                
+                data_k = get_data()
+                gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                #make all columns editable
+                gb_k.configure_columns(["Single","Double","Triple"], editable=True)
+                go_k = gb_k.build()
+                
+                ag_k = AgGrid(
+                    data_k, 
+                    gridOptions=go_k, 
+                    height=93, 
+                    fit_columns_on_grid_load=True,
+                    theme= "light" # or "streamlit","light","balham","material"
+                )
+                # st.subheader("Returned Data")
+                # st.dataframe(ag_k['data'])
+                
+                df_prices_kids = ag_k["data"]
+                # st.dataframe(ag['data'])
+                df_prices_1k = float(df_prices_kids["Single"].values)
+                df_prices_2k = float(df_prices_kids["Double"].values)
+                df_prices_3k = float(df_prices_kids["Triple"].values)
+                
+                precios = [df_prices_1k,df_prices_2k,df_prices_3k]
+                # st.write(precios)
+                st.subheader("Image")
                 uploaded_files = st.file_uploader("Select 1 image")
                 if uploaded_files!=None:
                     st.image(uploaded_files, use_column_width="auto",output_format="PNG")
+
                     
             with col2:
                 # lista de las locations
@@ -3300,6 +3370,8 @@ if menu_sidebar == "Data":
                 lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
                 calidad = st.selectbox("Choose the hotel rating",lista)
                 estrellas = lista.index(calidad)+1
+                
+            
             if st.button("Save data"):
                 with st.spinner('Saving...'):
                     title_separate = name_en.replace(" ", "_")
@@ -3319,7 +3391,8 @@ if menu_sidebar == "Data":
                     "Name_es": name_es,
                     "location": lugares,
                     "rating": estrellas,
-                    "imagen": image_1
+                    "imagen": image_1,
+                    "prices": precios
                     }
                     
                     collection.insert_one(record)
@@ -3350,7 +3423,48 @@ if menu_sidebar == "Data":
                 name_en = st.text_input("Name in english", complete_data["Name_en"])
                 name_de = st.text_input("Name in deutsch", complete_data["Name_de"])
                 name_es = st.text_input("Name in español", complete_data["Name_es"])
+                # Put the prices
+                @st.cache()
+                def get_data():
+                    incluir = np.arange(1)
+                    values = complete_data["prices"][0]
+                    values_2 = complete_data["prices"][1]
+                    values_3 = complete_data["prices"][2]
+                    df = pd.DataFrame(
+                        {"Single": [values],"Double":[values_2],"Triple":[values_3]}
+                    )
+                    return df
                 
+                precios_kids = False
+                
+                st.subheader("Prices")
+                st.markdown('* These prices are for a maximum of 3 people per room and per night')
+                st.markdown('* Also this prices are just optional, you can change them later')
+                
+                data_k = get_data()
+                gb_k = GridOptionsBuilder.from_dataframe(data_k)
+                #make all columns editable
+                gb_k.configure_columns(["Single","Double","Triple"], editable=True)
+                go_k = gb_k.build()
+                
+                ag_k = AgGrid(
+                    data_k, 
+                    gridOptions=go_k, 
+                    height=93, 
+                    fit_columns_on_grid_load=True,
+                    theme= "light" # or "streamlit","light","balham","material"
+                )
+                # st.subheader("Returned Data")
+                # st.dataframe(ag_k['data'])
+                
+                df_prices_kids = ag_k["data"]
+                # st.dataframe(ag['data'])
+                df_prices_1k = float(df_prices_kids["Single"].values)
+                df_prices_2k = float(df_prices_kids["Double"].values)
+                df_prices_3k = float(df_prices_kids["Triple"].values)
+                
+                precios = [df_prices_1k,df_prices_2k,df_prices_3k]
+
                 st.subheader("Image")
                 st.image(get_link(bucket_name, complete_data["imagen"]), width=500 )
                 uploaded_file = st.file_uploader("Upload new image")
@@ -3397,14 +3511,15 @@ if menu_sidebar == "Data":
                         "Name_es": name_es,
                         "location": lugares,
                         "rating": estrellas,
-                        "imagen": image_1
+                        "imagen": image_1,
+                        "prices": precios
                         }
                         
                         
                         collection.update_one({"_id":code},{"$set":record})
                         if uploaded_file is not None:
                                 uploadimageToS3(uploaded_file,bucket_name , image_1)
-                        st.success("Location updated")
+                        st.success("Data updated")
                 
                 if name_en!= complete_data["Name_en"]:
                     with st.spinner('Uploading...'):
@@ -3421,7 +3536,8 @@ if menu_sidebar == "Data":
                         "Name_es": name_es,
                         "location": lugares,
                         "rating": estrellas,
-                        "imagen": image_1
+                        "imagen": image_1,
+                        "prices": precios
                         }
                         
                         collection.update_one({"_id":code},{"$set":record})
@@ -3433,7 +3549,7 @@ if menu_sidebar == "Data":
                         # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
                         if uploaded_file is not None:
                             uploadimageToS3(uploaded_file,bucket_name , image_1)
-                        st.success("Location updated")
+                        st.success("Data updated")
                 
         ########################
         # Delete a location
@@ -3504,13 +3620,102 @@ if menu_sidebar == "Data":
                     except: 
                         st.error("Error deleting images")
                     
-
+    ########################
+    # Create a bundle
+    ######################## 
     if menu == "Bundle":
         activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="bundle_options")
         if activities_option == "Create new":
-            st.stop()
+            
             st.subheader("Create a new bundle")
-            st.text_input("Bundle name")
+
+            with st.sidebar.expander("Bundle", expanded=True):
+                
+                onRowDragEnd = JsCode("""
+                function onRowDragEnd(e) {
+                    console.log('onRowDragEnd', e);
+                }
+                """)
+
+                getRowNodeId = JsCode("""
+                function getRowNodeId(data) {
+                    return data.id
+                }
+                """)
+
+                onGridReady = JsCode("""
+                function onGridReady() {
+                    immutableStore.forEach(
+                        function(data, index) {
+                            data.id = index;
+                            });
+                    gridOptions.api.setRowData(immutableStore);
+                    }
+                """)
+
+                onRowDragMove = JsCode("""
+                function onRowDragMove(event) {
+                    var movingNode = event.node;
+                    var overNode = event.overNode;
+
+                    var rowNeedsToMove = movingNode !== overNode;
+
+                    if (rowNeedsToMove) {
+                        var movingData = movingNode.data;
+                        var overData = overNode.data;
+
+                        immutableStore = newStore;
+
+                        var fromIndex = immutableStore.indexOf(movingData);
+                        var toIndex = immutableStore.indexOf(overData);
+
+                        var newStore = immutableStore.slice();
+                        moveInArray(newStore, fromIndex, toIndex);
+
+                        immutableStore = newStore;
+                        gridOptions.api.setRowData(newStore);
+
+                        gridOptions.api.clearFocusedCell();
+                    }
+
+                    function moveInArray(arr, fromIndex, toIndex) {
+                        var element = arr[fromIndex];
+                        arr.splice(fromIndex, 1);
+                        arr.splice(toIndex, 0, element);
+                    }
+                }
+                """)
+
+                df = pd.DataFrame(
+                    "",
+                    index=range(25),
+                    columns=["Bundle"],
+                )
+
+                gb = GridOptionsBuilder.from_dataframe(df)
+                gb.configure_default_column(rowDrag = False, rowDragManaged = True, rowDragEntireRow = False, rowDragMultiRow=True, editable=True)
+                gb.configure_column('Bundle',
+                    cellEditor='agRichSelectCellEditor',
+                    cellEditorParams={'values':["","City tour cusco", "City tour Lima", "Hotel monasterio"]},
+                    cellEditorPopup=True,
+                    rowDrag = True,
+                    rowDragEntireRow = True,
+                    rowDragManaged = True
+                )
+                gb.configure_grid_options(enableRangeSelection=True, rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
+
+                go =gb.build()
+
+                response = AgGrid(
+                    df,
+                    gridOptions=go,
+                    fit_columns_on_grid_load=True,
+                    allow_unsafe_jscode=True,
+                    enable_enterprise_modules=True,
+                    update_mode=GridUpdateMode.MANUAL,
+                    theme = "light"  # or ['streamlit', 'light', 'dark', 'blue', 'fresh', 'material']
+                )
+                st.write(response['data'])
 
             # You can call any Streamlit command, including custom components:
             if "option1a" not in st.session_state:
