@@ -20,11 +20,12 @@ import requests
 # Iam using the account IAM ""
 bucket_name = "peruviansunrise-storage"
 region_bucket='sa-east-1'
-# S3_KEY = st.secrets["db_username"]
-# S3_SECRET = st.secrets["db_password"]
+S3_KEY = st.secrets["db_username"]
+S3_SECRET = st.secrets["db_password"]
 
-S3_KEY = "AKIARCQ5LPGGXKDJ57SL"
-S3_SECRET = "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"
+# S3_KEY = "AKIARCQ5LPGGXKDJ57SL"
+# S3_SECRET = "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"
+
 # connect to s3 service and download a file from S3 bucket
 def get_link(bucket_name, object_name, expiration=3600):
     """Generate a presigned URL to share an S3 object
