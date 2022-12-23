@@ -73,6 +73,62 @@ path_to_file = 'sample.html'
 
 
 
+
+
+onRowDragEnd = JsCode("""
+function onRowDragEnd(e) {
+    console.log('onRowDragEnd', e);
+}
+""")
+
+getRowNodeId = JsCode("""
+function getRowNodeId(data) {
+    return data.id
+}
+""")
+
+onGridReady = JsCode("""
+function onGridReady() {
+    immutableStore.forEach(
+        function(data, index) {
+            data.id = index;
+            });
+    gridOptions.api.setRowData(immutableStore);
+    }
+""")
+
+onRowDragMove = JsCode("""
+function onRowDragMove(event) {
+    var movingNode = event.node;
+    var overNode = event.overNode;
+
+    var rowNeedsToMove = movingNode !== overNode;
+
+    if (rowNeedsToMove) {
+        var movingData = movingNode.data;
+        var overData = overNode.data;
+
+        immutableStore = newStore;
+
+        var fromIndex = immutableStore.indexOf(movingData);
+        var toIndex = immutableStore.indexOf(overData);
+
+        var newStore = immutableStore.slice();
+        moveInArray(newStore, fromIndex, toIndex);
+
+        immutableStore = newStore;
+        gridOptions.api.setRowData(newStore);
+
+        gridOptions.api.clearFocusedCell();
+    }
+
+    function moveInArray(arr, fromIndex, toIndex) {
+        var element = arr[fromIndex];
+        arr.splice(fromIndex, 1);
+        arr.splice(toIndex, 0, element);
+    }
+}
+""")
 ############################
 # Connection to MongoDB
 ############################
@@ -176,13 +232,14 @@ if menu_sidebar == "Create new":
     
     
     # st.info(f"Phase #{val}")
-    st.sidebar.selectbox("Lenguage", ["English", "Spanish", "Alemán"], index=0)
+    lenguage = st.sidebar.selectbox("Lenguage", ["English", "Spanish", "Deutsch"], index=0)
     st.sidebar.selectbox("Type",["General", "Program with details"], index=0)
     st.sidebar.subheader("Passengers")
     adultos = st.sidebar.number_input("Personas adultas", min_value=0, max_value=50, value=1, step=1, key="adultos")
     niños = st.sidebar.number_input("Niños(a)", min_value=0, max_value=50, value=0, step=1, key="niños")
     st.sidebar.session_state.adultos = adultos
     st.sidebar.session_state.niños = niños
+    
     
     st.sidebar.subheader("Itinerary")
     
@@ -197,16 +254,30 @@ if menu_sidebar == "Create new":
 
     with st.sidebar.form('example form') as f:
         
+        # lista de las locations
+        # Pedir datos de mongo db para  obtener los nombres de las actividades
+        collection_location = db["locations"]
+        data1 = collection_location.find({},{"Name_en":1})
+        
+        list_activitiess = []
+        for value in data1:
+            list_activitiess.append(value["Name_en"])
+        # fin
+
+
         gb = GridOptionsBuilder.from_dataframe(df_template)
-        gb.configure_default_column(editable=True)
+        gb.configure_default_column(rowDrag = False, rowDragManaged = True, rowDragEntireRow = False, rowDragMultiRow=True, editable=True)
 
         gb.configure_column('Lugar', type=['textColumn'], editable=True,
             cellEditor='agRichSelectCellEditor',
-            cellEditorParams={'values':["",'Lima','Cusco','Arequipa','Madre de Dios','Ica']},
-            cellEditorPopup=True
+            cellEditorParams={'values':[""]+ list_activitiess },
+            cellEditorPopup=True,
+            rowDrag = True,
+            rowDragEntireRow = True,
+            rowDragManaged = True
         )
 
-        gb.configure_grid_options(enableRangeSelection=True)
+        gb.configure_grid_options(enableRangeSelection=True, rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
 
 
         response = AgGrid(
@@ -220,7 +291,6 @@ if menu_sidebar == "Create new":
         
         # response = AgGrid(df_template, editable=True, fit_columns_on_grid_load=True)
         st.form_submit_button("Save")
-
     
 
 
@@ -228,12 +298,6 @@ if menu_sidebar == "Create new":
     df= pd.DataFrame(response['data'])
     # limpiar de valores vacios
     df = df[df['Lugar'].astype(bool)]
-    
-    
-    
-    st.sidebar.caption("Developed by  [**Fidel Ramos**](https://vittaquant-ai.com)")
-    st.sidebar.caption("**VittaQuant Techonologies**")
-    st.sidebar.markdown('##')  
 
         
         
@@ -695,120 +759,124 @@ if menu_sidebar == "Create new":
     #? Creacion de las opciones de portada para la impresion
     ##############################
 
-
-    
-    lenguage = ["English", "Spanish", "Deutsch"]
-    lenguage = st.selectbox("Select your lenguage", lenguage)
-
-    # Make folder for storing user uploads
-    destination_folder = Path('downloads')
-    destination_folder.mkdir(exist_ok=True, parents=True)
-    def merge_pdfs(pdf_path):
-        #! This is used to pre uploaded pdf to the app 
-        with open(pdf_path, "rb") as pdf_file:
-            data_2 = base64.b64encode(pdf_file.read())
-            return data_2
-        #! Fin
-    with st.expander("Styling your Program", expanded=True):
-        data_2="ok"
-        if lenguage=="English":
-            col1, col2 = st.columns(2)
-            col1.image("imagenes/1a.png", width=200)
-            col2.image("imagenes/2a.png", width=200)
-            option_1a = col1.checkbox("Select", key="1a")
-            option_2a = col2.checkbox("Select", key="2a")
-            
-            if option_1a:
-                data_2 = merge_pdfs("imagenes/1.pdf")
+    with st.sidebar:
+        # Make folder for storing user uploads
+        
+        destination_folder = Path('downloads')
+        destination_folder.mkdir(exist_ok=True, parents=True)
+        def merge_pdfs(pdf_path):
+            #! This is used to pre uploaded pdf to the app 
+            with open(pdf_path, "rb") as pdf_file:
+                data_2 = base64.b64encode(pdf_file.read())
+                return data_2
+            #! Fin
+        with st.expander("Styling your Program", expanded=True):
+            data_2="ok"
+            if lenguage=="English":
                 
-            if option_2a:
-                data_2 = merge_pdfs("imagenes/2.pdf")   
-            if data_2==None:
-                st.stop()
-        if lenguage=="Spanish":
-            col1, col2 = st.columns(2)
-            col1.image("imagenes/3a.png", width=200)
-            col2.image("imagenes/4a.png", width=200)
-            option_3a = col1.checkbox("Select", key="3a")
-            option_4a = col2.checkbox("Select", key="4a")
-            
-            if option_3a:
-                data_2 = merge_pdfs("imagenes/3.pdf")
+                st.image("imagenes/1a.png", width=200)
+                option_1a = st.checkbox("Select", key="1a")
+                st.image("imagenes/2a.png", width=200)
                 
-            if option_4a:
-                data_2 = merge_pdfs("imagenes/4.pdf")  
-            if data_2==None:
-                st.stop()
-        if lenguage=="Deutsch":
-            col1, col2 = st.columns(2)
-            col1.image("imagenes/5a.png", width=200)
-            col2.image("imagenes/6a.png", width=200)
-            option_5a = col1.checkbox("Select", key="5a")
-            option_6a = col2.checkbox("Select", key="6a")
-            
-            if option_5a:
-                data_2 = merge_pdfs("imagenes/5.pdf")
+                option_2a = st.checkbox("Select", key="2a")
                 
-            if option_6a:
-                data_2 = merge_pdfs("imagenes/6.pdf")  
-            if data_2==None:
-                st.stop()
-        if data_2!="ok":
-            # Defines what options are in the form
-            class PDFMergeRequest(BaseModel):
-                pdf_uploads: Optional[List[FileContent]] = Field(
-                    data_2,
-                    alias="PDF Files to Merge",
-                    description="PDF that needs to be merged",
-                )
-            pdf_output = '.pdf'
-            output_suffix = '.pdf'
-            merge = 'Merge Multiple PDFs into One'
-            split = 'Split One PDF into Multiple'
-            view_choice = merge 
-            if view_choice == merge:
-                # Get the data from the form, stop running if user hasn't submitted pdfs yet
-                data = sp.pydantic_form(key="pdf_merge_form", model=PDFMergeRequest )
-                #! If you want to use the app without the opcion of pre upload pdf, just put the next value this in 2 and not in 1
-                if data is None or data.pdf_uploads is None or len(data.pdf_uploads) < 1:
-                    st.warning("Please, upload at least 1 PDFs and press Submit")
+                if option_1a:
+                    data_2 = merge_pdfs("imagenes/1.pdf")
+                    
+                if option_2a:
+                    data_2 = merge_pdfs("imagenes/2.pdf")   
+                if data_2==None:
                     st.stop()
-                data.pdf_uploads.insert(0,data_2)
-                # st.write(data.pdf_uploads)
+            if lenguage=="Spanish":
                 
-                # Save Uploaded PDFs
-                uploaded_paths = []
-                for pdf_data in data.pdf_uploads:
-                    try:
-                        input_pdf_path = destination_folder / f"input_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.pdf"
-                        input_pdf_path.write_bytes(pdf_data.as_bytes())
-                        uploaded_paths.append(input_pdf_path)
-                    #! This is a hack to get around the fact that streamlit_pydantic doesn't support base64 encoded files
-                    #! This a piece of code to allow the app to work with a pdf previously uploaded to the app
-                    except AttributeError:
-                        input_pdf_path.write_bytes(base64.b64decode(pdf_data, validate=True))
-                        uploaded_paths.append(input_pdf_path)    
-                    #! Fin
-                pdf_writer = PdfFileWriter()
-                for path in uploaded_paths:
-                    pdf_reader = PdfFileReader(str(path))
-                    for page in range(pdf_reader.getNumPages()):
-                        # Add each page to the writer object
-                        pdf_writer.addPage(pdf_reader.getPage(page))
-
-                # Write out the merged PDF
-                output_pdf_path = destination_folder / f"output_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.pdf"
-                with open(str(output_pdf_path), 'wb') as out:
-                    pdf_writer.write(out)
-                output_path = output_pdf_path
-                # Convert to stacked / merged image
+                st.image("imagenes/3a.png", width=200)
+                option_3a = st.checkbox("Select", key="3a")
+                st.image("imagenes/4a.png", width=200)
+                option_4a = st.checkbox("Select", key="4a")
                 
-                # Allow download
-                if output_suffix == pdf_output:
-                    output_mime = 'application/pdf'
-                st.download_button('Download Merged Document', output_path.read_bytes(), f"output_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}{output_suffix}", mime=output_mime)
+                if option_3a:
+                    data_2 = merge_pdfs("imagenes/3.pdf")
+                    
+                if option_4a:
+                    data_2 = merge_pdfs("imagenes/4.pdf")  
+                if data_2==None:
+                    st.stop()
+            if lenguage=="Deutsch":
+                
+                st.image("imagenes/5a.png", width=200)
+                option_5a = st.checkbox("Select", key="5a")
+                st.image("imagenes/6a.png", width=200)
+                
+                option_6a = st.checkbox("Select", key="6a")
+                
+                if option_5a:
+                    data_2 = merge_pdfs("imagenes/5.pdf")
+                    
+                if option_6a:
+                    data_2 = merge_pdfs("imagenes/6.pdf")  
+                if data_2==None:
+                    st.stop()
+            if data_2!="ok":
+                # Defines what options are in the form
+                class PDFMergeRequest(BaseModel):
+                    pdf_uploads: Optional[List[FileContent]] = Field(
+                        data_2,
+                        alias="PDF Files to Merge",
+                        description="PDF that needs to be merged",
+                    )
+                pdf_output = '.pdf'
+                output_suffix = '.pdf'
+                merge = 'Merge Multiple PDFs into One'
+                split = 'Split One PDF into Multiple'
+                view_choice = merge 
+                if view_choice == merge:
+                    # Get the data from the form, stop running if user hasn't submitted pdfs yet
+                    data = sp.pydantic_form(key="pdf_merge_form", model=PDFMergeRequest )
+                    #! If you want to use the app without the opcion of pre upload pdf, just put the next value this in 2 and not in 1
+                    if data is None or data.pdf_uploads is None or len(data.pdf_uploads) < 1:
+                        st.warning("Please, upload at least 1 PDFs and press Submit")
+                        st.stop()
+                    data.pdf_uploads.insert(0,data_2)
+                    # st.write(data.pdf_uploads)
+                    
+                    # Save Uploaded PDFs
+                    uploaded_paths = []
+                    for pdf_data in data.pdf_uploads:
+                        try:
+                            input_pdf_path = destination_folder / f"input_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.pdf"
+                            input_pdf_path.write_bytes(pdf_data.as_bytes())
+                            uploaded_paths.append(input_pdf_path)
+                        #! This is a hack to get around the fact that streamlit_pydantic doesn't support base64 encoded files
+                        #! This a piece of code to allow the app to work with a pdf previously uploaded to the app
+                        except AttributeError:
+                            input_pdf_path.write_bytes(base64.b64decode(pdf_data, validate=True))
+                            uploaded_paths.append(input_pdf_path)    
+                        #! Fin
+                    pdf_writer = PdfFileWriter()
+                    for path in uploaded_paths:
+                        pdf_reader = PdfFileReader(str(path))
+                        for page in range(pdf_reader.getNumPages()):
+                            # Add each page to the writer object
+                            pdf_writer.addPage(pdf_reader.getPage(page))
 
-
+                    # Write out the merged PDF
+                    output_pdf_path = destination_folder / f"output_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}.pdf"
+                    with open(str(output_pdf_path), 'wb') as out:
+                        pdf_writer.write(out)
+                    output_path = output_pdf_path
+                    # Convert to stacked / merged image
+                    
+                    # Allow download
+                    if output_suffix == pdf_output:
+                        output_mime = 'application/pdf'
+                    st.download_button('Download Merged Document', output_path.read_bytes(), f"output_{datetime.now().strftime('%Y_%m_%d_%H_%M_%S_%f')}{output_suffix}", mime=output_mime)
+    
+    st.sidebar.caption("Developed by  [**Fidel Ramos**](https://vittaquant-ai.com)")
+    st.sidebar.caption("**VittaQuant Technologies**")
+    st.sidebar.markdown('##')  
+    #######################
+    # FIN
+    #######################
 
 
 
@@ -3749,579 +3817,203 @@ if menu_sidebar == "Data":
         if activities_option == "Create new":
             
             st.subheader("Create a new bundle")
-
-            with st.sidebar.expander("Bundle", expanded=True):
+        
+            if 'data_location' not in st.session_state:
+                st.session_state.data_location = [] #!esto debe de estar asi o generara errores, cuidado!
+            if "lugares_pasado" not in st.session_state:
+                st.session_state.lugares_pasado = [""]
+        
+            def update_all():
+                st.session_state.bundlelocation = st.session_state.data_location
                 
-                onRowDragEnd = JsCode("""
-                function onRowDragEnd(e) {
-                    console.log('onRowDragEnd', e);
-                }
-                """)
-
-                getRowNodeId = JsCode("""
-                function getRowNodeId(data) {
-                    return data.id
-                }
-                """)
-
-                onGridReady = JsCode("""
-                function onGridReady() {
-                    immutableStore.forEach(
-                        function(data, index) {
-                            data.id = index;
-                            });
-                    gridOptions.api.setRowData(immutableStore);
-                    }
-                """)
-
-                onRowDragMove = JsCode("""
-                function onRowDragMove(event) {
-                    var movingNode = event.node;
-                    var overNode = event.overNode;
-
-                    var rowNeedsToMove = movingNode !== overNode;
-
-                    if (rowNeedsToMove) {
-                        var movingData = movingNode.data;
-                        var overData = overNode.data;
-
-                        immutableStore = newStore;
-
-                        var fromIndex = immutableStore.indexOf(movingData);
-                        var toIndex = immutableStore.indexOf(overData);
-
-                        var newStore = immutableStore.slice();
-                        moveInArray(newStore, fromIndex, toIndex);
-
-                        immutableStore = newStore;
-                        gridOptions.api.setRowData(newStore);
-
-                        gridOptions.api.clearFocusedCell();
-                    }
-
-                    function moveInArray(arr, fromIndex, toIndex) {
-                        var element = arr[fromIndex];
-                        arr.splice(fromIndex, 1);
-                        arr.splice(toIndex, 0, element);
-                    }
-                }
-                """)
-
-                df = pd.DataFrame(
-                    "",
-                    index=range(25),
-                    columns=["Bundle"],
-                )
-
-                gb = GridOptionsBuilder.from_dataframe(df)
-                gb.configure_default_column(rowDrag = False, rowDragManaged = True, rowDragEntireRow = False, rowDragMultiRow=True, editable=True)
-                gb.configure_column('Bundle',
-                    cellEditor='agRichSelectCellEditor',
-                    cellEditorParams={'values':["","City tour cusco", "City tour Lima", "Hotel monasterio"]},
-                    cellEditorPopup=True,
-                    rowDrag = True,
-                    rowDragEntireRow = True,
-                    rowDragManaged = True
-                )
-                gb.configure_grid_options(enableRangeSelection=True, rowDragManaged = True, onRowDragEnd = onRowDragEnd, deltaRowDataMode = True, getRowNodeId = getRowNodeId, onGridReady = onGridReady, animateRows = True, onRowDragMove = onRowDragMove)
-
-                go =gb.build()
-
-                response = AgGrid(
-                    df,
-                    gridOptions=go,
-                    fit_columns_on_grid_load=True,
-                    allow_unsafe_jscode=True,
-                    enable_enterprise_modules=True,
-                    update_mode=GridUpdateMode.MANUAL,
-                    theme = "light"  # or ['streamlit', 'light', 'dark', 'blue', 'fresh', 'material']
-                )
-                st.write(response['data'])
-
-            # You can call any Streamlit command, including custom components:
-            if "option1a" not in st.session_state:
-                st.session_state["option1a"] = ""
-            if "option2a" not in st.session_state:
-                st.session_state["option2a"] = ""
-            if "option3a" not in st.session_state:
-                st.session_state["option3a"] = ""
-            if "option4a" not in st.session_state:
-                st.session_state["option4a"] = ""
-            if "option5a" not in st.session_state:
-                st.session_state["option5a"] = ""
-            if "option6a" not in st.session_state:
-                st.session_state["option6a"] = ""
-            if "option7a" not in st.session_state:
-                st.session_state["option7a"] = ""
-            if "option8a" not in st.session_state:
-                st.session_state["option8a"] = ""
-            if "option9a" not in st.session_state:
-                st.session_state["option9a"] = ""
-            if "option10a" not in st.session_state:
-                st.session_state["option10a"] = ""
-                
-            if "option1b" not in st.session_state:
-                st.session_state["option1b"] = ""
-            if "option2b" not in st.session_state:
-                st.session_state["option2b"] = ""
-            if "option3b" not in st.session_state:
-                st.session_state["option3b"] = ""
-            if "option4b" not in st.session_state:
-                st.session_state["option4b"] = ""
-            if "option5b" not in st.session_state:
-                st.session_state["option5b"] = ""
-            if "option6b" not in st.session_state:
-                st.session_state["option6b"] = ""
-            if "option7b" not in st.session_state:
-                st.session_state["option7b"] = ""
-            if "option8b" not in st.session_state:
-                st.session_state["option8b"] = ""
-            if "option9b" not in st.session_state:
-                st.session_state["option9b"] = ""
-            if "option10b" not in st.session_state:
-                st.session_state["option10b"] = ""
-                
-            if "descrip_1_en" not in st.session_state:
-                st.session_state["descrip_1_en"] = ""
-                st.session_state["descrip_1_de"] = ""
-                st.session_state["descrip_1_es"] = ""
-            if "descrip_2_en" not in st.session_state:
-                st.session_state["descrip_2_en"] = ""
-                st.session_state["descrip_2_de"] = ""
-                st.session_state["descrip_2_es"] = ""
-            if "descrip_3_en" not in st.session_state:
-                st.session_state["descrip_3_en"] = ""
-                st.session_state["descrip_3_de"] = ""
-                st.session_state["descrip_3_es"] = ""
-            if "descrip_4_en" not in st.session_state:
-                st.session_state["descrip_4_en"] = ""
-                st.session_state["descrip_4_de"] = ""
-                st.session_state["descrip_4_es"] = ""
-            if "descrip_5_en" not in st.session_state:
-                st.session_state["descrip_5_en"] = ""
-                st.session_state["descrip_5_de"] = ""
-                st.session_state["descrip_5_es"] = ""
-            if "descrip_6_en" not in st.session_state:
-                st.session_state["descrip_6_en"] = ""
-                st.session_state["descrip_6_de"] = ""
-                st.session_state["descrip_6_es"] = ""
-            if "descrip_7_en" not in st.session_state:
-                st.session_state["descrip_7_en"] = ""
-                st.session_state["descrip_7_de"] = ""
-                st.session_state["descrip_7_es"] = ""
-            if "descrip_8_en" not in st.session_state:
-                st.session_state["descrip_8_en"] = ""
-                st.session_state["descrip_8_de"] = ""
-                st.session_state["descrip_8_es"] = ""
-            if "descrip_9_en" not in st.session_state:
-                st.session_state["descrip_9_en"] = ""
-                st.session_state["descrip_9_de"] = ""
-                st.session_state["descrip_9_es"] = ""
-            if "descrip_10_en" not in st.session_state:
-                st.session_state["descrip_10_en"] = ""
-                st.session_state["descrip_10_de"] = ""
-                st.session_state["descrip_10_es"] = ""
-            
-            # funcion para pedir todos los datos
             # Pedir datos de mongo db para  obtener los nombres de las actividades
-            def data_complete():
-                #! Pedir data de activities
-                collection = db["activities"]
-                data = collection.find({},{"Name_en":1, "Operator":1,"_id":1})
-                
-                list_activities = [""]
-                ids_activities = [""]
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+            # fin
+            lugares = st.multiselect("Choose the location",list_activities, key= "lugarcitos", on_change=update_all)
+            if lugares == []:
+                st.stop()
+            st.session_state.lugares_actual = lugares
+            
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection = db["activities"]
+            data = collection.find({},{"Name_en":1, "Operator":1,"_id":1, "Location":1})
+            
+            list_activities = [""]
+            ids_activities = [""]
+            transporte = [""]
 
-                for value in data:
+            for value in data:
+                g = [i for i in value["Location"] if i in lugares]
+                if len(g) > 0:
                     list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
                     ids_activities.append(value["_id"])
-                #! Pedir data de transport
-                collection = db["transport"]
-                data = collection.find({},{"Name_en":1, "operator":1,"_id":1})
-                for value in data:
-                    list_activities.append(value["Name_en"] + " (" + value["operator"]+ ")")
+                    transporte.append("X")
+            
+            # Pedir datos de mongo db para  obtener los nombres de los transportes
+            collection = db["transport"]
+            data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
+            for value in data:
+                
+                g1 = [i for i in value["route1"] if i in lugares]
+                g2 = [i for i in value["route2"] if i in lugares]
+                g3 = [i for i in value["route3"] if i in lugares]
+                g4 = [i for i in value["route4"] if i in lugares]
+                g5 = [i for i in value["route5"] if i in lugares]
+                g6 = [i for i in value["route6"] if i in lugares]
+                g7 = [i for i in value["route7"] if i in lugares]
+                g8 = [i for i in value["route8"] if i in lugares]
+                g9 = [i for i in value["route9"] if i in lugares]
+                g10 = [i for i in value["route10"] if i in lugares]
+                final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
+                if len(final)>0:
+                    list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
+                    transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
                     ids_activities.append(value["_id"])
-                #! Pedir data de accommodations
-                collection = db["accommodations"]
-                data = collection.find({},{"Name_en":1, "rating":1,"_id":1})
-                for value in data:
-                    list_activities.append(value["Name_en"] + " (" + value["rating"]+ ")")
-                    ids_activities.append(value["_id"])
+                    if len(final)>=2:
+                        list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
+                        transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
+                        ids_activities.append(value["_id"])
+                        if len(final)>=3:
+                            list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
+                            transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
+                            ids_activities.append(value["_id"])
+                            if len(final)>=4:
+                                list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
+                                transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
+                                ids_activities.append(value["_id"])
+                                if len(final)>=5:
+                                    list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
+                                    transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
+                                    ids_activities.append(value["_id"])
+                                    if len(final)>=6:
+                                        list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
+                                        transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
+                                        ids_activities.append(value["_id"])
+                                        if len(final)>=7:
+                                            list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
+                                            transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
+                                            ids_activities.append(value["_id"])
+                                            if len(final)>=8:
+                                                list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
+                                                transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
+                                                ids_activities.append(value["_id"])
+                                                if len(final)>=9:
+                                                    list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
+                                                    transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                    ids_activities.append(value["_id"])
+                                                    if len(final)>=10:
+                                                        list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
+                                                        transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                        ids_activities.append(value["_id"])
+        
+            #! Nueva forma de hacer
+            
+            #! Fin
 
-                return list_activities, ids_activities
-            # FIN 
+            with st.expander('Select values', expanded=True):
+                col1, col2 = st.columns(2)
+                with col1:
+
+                    st.subheader("Activities & Transport")
+                    from streamlit_sortables import sort_items
+
+
+                    original_items = list_activities
+                    # sorted_items = sort_items(original_items)
+
+                    # st.write(f'original_items: {original_items}')
+                    # st.write(f'sorted_items: {sorted_items}')
+                    if "data_sort" not in st.session_state:
+                        st.session_state.data_sort = []
+                    if "modified_sort"  not in st.session_state:
+                        st.session_state.modified_sort = []
+                    if "actual_sort"  not in st.session_state:
+                        st.session_state.actual_sort = []
+
+                    if "counter" not in st.session_state:
+                        st.session_state.counter = 0
+
+                    def data_changed():
+                        for x in st.session_state.actual_sort:
+                            if x not in st.session_state.data_sort:
+                                st.session_state.data_sort.append(x)
+                        for x in st.session_state.data_sort:
+                            if x not in st.session_state.actual_sort:
+                                st.session_state.data_sort.remove(x)
+                        st.session_state.modified_sort = st.session_state.data_sort 
+
+                    values = st.multiselect("Select values", original_items, default= None, key="bundlelocation", on_change=data_changed )
+                    st.session_state.data_location = values
+                    if len(values)==0:
+                            st.stop()
+                
+                with col2.container():
+                    st.subheader("Reorder the activities")
+                    st.write("Drag and drop the activities to reorder them")
+                    st.session_state.counter += 1
+                    st.session_state.actual_sort = values 
+
+                    if st.session_state.actual_sort == [original_items[0]]:
+                        st.write("ok")
+                        sorted_items = sort_items(st.session_state.actual_sort)
+                        st.session_state.data_sort = sorted_items
+                    else:    
+                        listita = []
+                        for x in st.session_state.actual_sort:
+                            if x not in st.session_state.data_sort:
+                                st.session_state.modified_sort.append(x)
+                        for x in st.session_state.data_sort:
+                            if x not in st.session_state.actual_sort:
+                                st.session_state.data_sort.remove(x)
+                        sorted_items = sort_items(st.session_state.modified_sort + listita )
+                        st.session_state.data_sort = sorted_items
+                    # # eliminar  el "" valor inicial
+                    # if st.session_state.counter==1:
+                    #     del st.session_state.data_sort[0]
+                    elegir_actividad = st.session_state.data_sort
             
+            if elegir_actividad ==None or elegir_actividad==[]:
+                st.stop()
             
-            # order_activity = list_activities.index(elegir_actividad)
-            # code = ids_activities[order_activity]
-            # complete_data = collection.find_one({"_id":code})
-            
-            with st.expander("Location", expanded=True):
-                c1, c2 = st.columns((2,5))
-                slider_number = c1.number_input("Add", 1, 10)
-                
-                # it's needed this 2 lines of code to run a lottie animation
-                link = "https://assets3.lottiefiles.com/packages/lf20_q6dNvPXDCZ.json"
-                lottie_json = load_lottieurl(link)
-                # fin
-                
-                # crear las variables para la eliminación de  las rutas 
-                if "route_1" not in st.session_state: 
-                    st.session_state['route_1'] = False
-                if "route_2" not in st.session_state: 
-                    st.session_state['route_2'] = False
-                if "route_3" not in st.session_state: 
-                    st.session_state['route_3'] = False
-                if "route_4" not in st.session_state: 
-                    st.session_state['route_4'] = False
-                if "route_5" not in st.session_state: 
-                    st.session_state['route_5'] = False
-                if "route_6" not in st.session_state: 
-                    st.session_state['route_6'] = False
-                if "route_7" not in st.session_state: 
-                    st.session_state['route_7'] = False
-                if "route_8" not in st.session_state: 
-                    st.session_state['route_8'] = False
-                if "route_9" not in st.session_state: 
-                    st.session_state['route_9'] = False
-                if "route_10" not in st.session_state: 
-                    st.session_state['route_10'] = False
-                
-                value=15
-                for x in range(1,11):
-                    if st.session_state["route_"+str(x)] == False:
-                        value = x
-                    x+=1
-                
-                
-                route1 = st.empty()   
-                route2 = st.empty()   
-                route3 = st.empty()  
-                route4 = st.empty()   
-                route5 = st.empty()   
-                route6 = st.empty()   
-                route7 = st.empty()  
-                route8 = st.empty()   
-                route9 = st.empty()   
-                route10 = st.empty() 
-                
-                if slider_number >= 1:
-                    with route1.container():
-                        col1a,col3a, col4a= st.columns([2,2,1])
-                        with col1a:
-                            salida_1 = st.selectbox("Origin",list_activities, key="salida_1")
-                            st.session_state['option1a'] = salida_1
+            else:
+                #! crear la funcion para crear todos los modelos de actividades 
+                def crear_actividad(data):
+                    co1, co2, co3 = st.columns((2,2,1))
+                    co2.subheader(data["Name_en"])
+                    st.write(data["Description_en"])
+
+                #! crear la funcion para crear todos los modelos para el transporte
+                def crear_transporte(data, number):
+                    
+                    co1, co2= st.columns((0.75,2))
+                    order_activity = list_activities.index(elegir_actividad[number])
+                    transporte_title = transporte[order_activity]
+                    co2.subheader(transporte_title)
+                    st.write(data["notes price"])
+                    
+                    
+                for x in range(len(elegir_actividad)):
+                    order_activity = list_activities.index(elegir_actividad[x])
+                    code = ids_activities[order_activity]
+                    
+                    collection = db["activities"]
+                    complete_data = collection.find_one({"_id":code})
+                    # en este caso es una actividad
+                    if complete_data != None:
                         
-                        with col3a:
-                            dias_1 = st.selectbox("Destination",list_activities, key="llegada_1")
-                            st.session_state['option1b'] = dias_1
-                        with col4a:
-                            st.markdown("Delete")
-                            but = st.button("Delete", key="delete_1")
-                            if but:
-                                st.session_state['route_1'] = True
-                                
-                    if st.session_state["route_1"]:
-                        st.session_state["option1a"] = ""
-                        st.session_state["option1b"] = ""
-                        route1.empty()
+                        crear_actividad(complete_data)
+
+                    if complete_data == None:
+                        collection = db["transport"]
+                        complete_data = collection.find_one({"_id":code})                
                         
-                if slider_number >= 2:
-                    with route2.container():
-                        col1b,col2b,col3b, col4b= st.columns([2,2,2,1])
-                        with col1b:
-                            salida_2 = st.selectbox("Origin",list_activities, key="salida_2")
-                            st.session_state['option2a'] = salida_2
-                        with col2b:
-                            st_lottie(lottie_json, height=70 , key="2_lottie", reverse=False )
-                        with col3b:
-                            dias_2 = st.selectbox("Destination",list_activities, key="llegada_2")
-                            st.session_state['option2b'] = dias_2
-                        with col4b:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_2"):
-                                st.session_state['route_2'] = True
-                    if st.session_state["route_2"]:
-                        st.session_state["option2a"] = ""
-                        st.session_state["option2b"] = ""
-                        route2.empty()
-                if slider_number >= 3:
-                    with route3.container():
-                        col1c,col2c,col3c, col4c= st.columns([2,2,2,1])
-                        with col1c:
-                            salida_3 = st.selectbox("Origin",list_activities, key="salida_3")
-                            st.session_state['option3a'] = salida_3
-                        with col2c:
-                            st_lottie(lottie_json, height=70 , key="3_lottie", reverse=False )
-                        with col3c:
-                            dias_3 = st.selectbox("Destination",list_activities, key="llegada_3")
-                            st.session_state['option3b'] = dias_3
-                        with col4c:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_3"):
-                                st.session_state['route_3'] = True
-                    if st.session_state["route_3"]:
-                        st.session_state["option3a"] = ""
-                        st.session_state["option3b"] = ""
-                        route3.empty()
-                if slider_number >= 4:
-                    with route4.container():
-                        col1d,col2d,col3d, col4d= st.columns([2,2,2,1])
-                        with col1d:
-                            salida_4 = st.selectbox("Origin",list_activities, key="salida_4")
-                            st.session_state['option4a'] = salida_4
-                        with col2d:
-                            st_lottie(lottie_json, height=70 , key="4_lottie", reverse=False )
-                        with col3d:
-                            dias_4 = st.selectbox("Destination",list_activities, key="llegada_4")
-                            st.session_state['option4b'] = dias_4
-                        with col4d:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_4"):
-                                st.session_state['route_4'] = True
-                    if st.session_state["route_4"]:
-                        st.session_state["option4a"] = ""
-                        st.session_state["option4b"] = ""
-                        route4.empty()  
-                if slider_number >= 5:
-                    with route5.container():
-                        col1e,col2e,col3e, col4e= st.columns([2,2,2,1])
-                        with col1e:
-                            salida_5 = st.selectbox("Origin",list_activities, key="salida_5")
-                            st.session_state['option5a'] = salida_5
-                        with col2e:
-                            st_lottie(lottie_json, height=70 , key="5_lottie", reverse=False )
-                        with col3e:
-                            dias_5 = st.selectbox("Destination",list_activities, key="llegada_5")
-                            st.session_state['option5b'] = dias_5
-                        with col4e:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_5"):
-                                st.session_state['route_5'] = True
-                    if st.session_state["route_5"]:
-                        st.session_state["option5a"] = ""
-                        st.session_state["option5b"] = ""
-                        route5.empty() 
-                if slider_number >= 6:
-                    with route6.container():
-                        col1f,col2f,col3f, col4f= st.columns([2,2,2,1])
-                        with col1f:
-                            salida_6 = st.selectbox("Origin",list_activities, key="salida_6")
-                            st.session_state['option6a'] = salida_6
-                        with col2f:
-                            st_lottie(lottie_json, height=70 , key="6_lottie", reverse=False )
-                        with col3f:
-                            dias_6 = st.selectbox("Destination",list_activities, key="llegada_6")
-                            st.session_state['option6b'] = dias_6
-                        with col4f:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_6"):
-                                st.session_state['route_6'] = True
-                    if st.session_state["route_6"]:
-                        st.session_state["option6a"] = ""
-                        st.session_state["option6b"] = ""
-                        route6.empty() 
-                if slider_number >= 7:
-                    with route7.container():
-                        col1g,col2g,col3g, col4g= st.columns([2,2,2,1])
-                        with col1g:
-                            salida_7 = st.selectbox("Origin",list_activities, key="salida_7")
-                            st.session_state['option7a'] = salida_7
-                        with col2g:
-                            st_lottie(lottie_json, height=70 , key="7_lottie", reverse=False )
-                        with col3g:
-                            dias_7 = st.selectbox("Destination",list_activities, key="llegada_7")
-                            st.session_state['option7b'] = dias_7
-                        with col4g:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_7"):
-                                st.session_state['route_7'] = True
-                    if st.session_state["route_7"]:
-                        st.session_state["option7a"] = ""
-                        st.session_state["option7b"] = ""
-                        route7.empty() 
-                if slider_number >= 8:
-                    with route8.container():
-                        col1h,col2h,col3h, col4h= st.columns([2,2,2,1])
-                        with col1h:
-                            salida_8 = st.selectbox("Origin",list_activities, key="salida_8")
-                            st.session_state['option8a'] = salida_8
-                        with col2h:
-                            st_lottie(lottie_json, height=70 , key="8_lottie", reverse=False )
-                        with col3h:
-                            dias_8 = st.selectbox("Destination",list_activities, key="llegada_8")
-                            st.session_state['option8b'] = dias_8
-                        with col4h:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_8"):
-                                st.session_state['route_8'] = True
-                    if st.session_state["route_8"]:
-                        st.session_state["option8a"] = ""
-                        st.session_state["option8b"] = ""
-                        route8.empty() 
-                if slider_number >= 9:
-                    with route9.container():
-                        col1i,col2i,col3i, col4i= st.columns([2,2,2,1])
-                        with col1i:
-                            salida_9 = st.selectbox("Origin",list_activities, key="salida_9")
-                            st.session_state['option9a'] = salida_9
-                        with col2i:
-                            st_lottie(lottie_json, height=70 , key="9_lottie", reverse=False )
-                        with col3i:
-                            dias_9 = st.selectbox("Destination",list_activities, key="llegada_9")
-                            st.session_state['option9b'] = dias_9
-                        with col4i:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_9"):
-                                st.session_state['route_9'] = True
-                    if st.session_state["route_9"]:
-                        st.session_state["option9a"] = ""
-                        st.session_state["option9b"] = ""
-                        route9.empty() 
-                if slider_number >= 10:
-                    with route10.container():
-                        col1j,col2j,col3j, col4j= st.columns([2,2,2,1])
-                        with col1j:
-                            salida_10 = st.selectbox("Origin",list_activities, key="salida_10")
-                            st.session_state['option10a'] = salida_10
-                        with col2j:
-                            st_lottie(lottie_json, height=70 , key="10_lottie", reverse=False )
-                        with col3j:
-                            dias_10 = st.selectbox("Destination",list_activities, key="llegada_10")
-                            st.session_state['option10b'] = dias_10
-                        with col4j:
-                            st.markdown("Delete")
-                            if st.button("Delete", key="delete_10"):
-                                st.session_state['route_10'] = True
-                    if st.session_state["route_10"]:
-                        st.session_state["option10a"] = ""
-                        st.session_state["option10b"] = ""
-                        route10.empty()
-
-            # creation of description of the route
-            if slider_number >= 1 and st.session_state["route_1"] == False:
-                st.subheader("Description "+st.session_state['option1a']+" to "+st.session_state['option1b'])
-                with st.container():
-                    coli1, coli2, coli3 =st.columns([1,1,1])
-                    st.session_state.descrip_1_en = coli1.text_area("English", key="descrip_1_enx")
-                    st.session_state.descrip_1_de = coli2.text_area("Deutsch", key="descrip_1_dex")
-                    st.session_state.descrip_1_es = coli3.text_area("Spanish", key="descrip_1_esx")
-            if  st.session_state["route_1"] != False:
-                st.session_state.descrip_1_en = ""
-                st.session_state.descrip_1_de = ""
-                st.session_state.descrip_1_es = ""
-                
-            if slider_number >= 2 and st.session_state["route_2"] == False:
-                st.subheader("Description "+st.session_state['option2a']+" to "+st.session_state['option2b'])
-                with st.container():
-                    coli1a, coli2a, coli3a =st.columns([1,1,1])
-                    st.session_state.descrip_2_en = coli1a.text_area("English", key="descrip_2_enx")
-                    st.session_state.descrip_2_de = coli2a.text_area("Deutsch", key="descrip_2_dex")
-                    st.session_state.descrip_2_es = coli3a.text_area("Spanish", key="descrip_2_esx")
-            if  st.session_state["route_2"] != False:
-                st.session_state.descrip_2_en = ""
-                st.session_state.descrip_2_de = ""
-                st.session_state.descrip_2_es = ""
-                
-            if slider_number >= 3 and st.session_state["route_3"] == False:
-                st.subheader("Description "+st.session_state['option3a']+" to "+st.session_state['option3b'])
-                with st.container():
-                    coli1b, coli2b, coli3b =st.columns([1,1,1])
-                    st.session_state.descrip_3_en = coli1b.text_area("English", key="descrip_3_enx")
-                    st.session_state.descrip_3_de = coli2b.text_area("Deutsch", key="descrip_3_dex")
-                    st.session_state.descrip_3_es = coli3b.text_area("Spanish", key="descrip_3_esx")
-            if  st.session_state["route_3"] != False:
-                st.session_state.descrip_3_en = ""
-                st.session_state.descrip_3_de = ""
-                st.session_state.descrip_3_es = ""
-                
-            if slider_number >= 4 and st.session_state["route_4"] == False:
-                st.subheader("Description "+st.session_state['option4a']+" to "+st.session_state['option4b'])
-                with st.container():
-                    coli1c, coli2c, coli3c =st.columns([1,1,1])
-                    st.session_state.descrip_4_en = coli1c.text_area("English", key="descrip_4_enx")
-                    st.session_state.descrip_4_de = coli2c.text_area("Deutsch", key="descrip_4_dex")
-                    st.session_state.descrip_4_es = coli3c.text_area("Spanish", key="descrip_4_esx")
-            if  st.session_state["route_4"] != False:
-                st.session_state.descrip_4_en = ""
-                st.session_state.descrip_4_de = ""
-                st.session_state.descrip_4_es = ""
-                
-            if slider_number >= 5 and st.session_state["route_5"] == False:
-                st.subheader("Description "+st.session_state['option5a']+" to "+st.session_state['option5b'])
-                with st.container():
-                    coli1d, coli2d, coli3d =st.columns([1,1,1])
-                    st.session_state.descrip_5_en = coli1d.text_area("English", key="descrip_5_enx")
-                    st.session_state.descrip_5_de = coli2d.text_area("Deutsch", key="descrip_5_dex")
-                    st.session_state.descrip_5_es = coli3d.text_area("Spanish", key="descrip_5_esx")      
-            if  st.session_state["route_5"] != False:
-                st.session_state.descrip_5_en = ""
-                st.session_state.descrip_5_de = ""
-                st.session_state.descrip_5_es = ""
-                
-            if slider_number >= 6 and st.session_state["route_6"] == False:
-                st.subheader("Description "+st.session_state['option6a']+" to "+st.session_state['option6b'])
-                with st.container():
-                    coli1e, coli2e, coli3e =st.columns([1,1,1])
-                    st.session_state.descrip_6_en = coli1e.text_area("English", key="descrip_6_enx")
-                    st.session_state.descrip_6_de = coli2e.text_area("Deutsch", key="descrip_6_dex")
-                    st.session_state.descrip_6_es = coli3e.text_area("Spanish", key="descrip_6_esx")  
-            if  st.session_state["route_6"] != False:
-                st.session_state.descrip_6_en = ""
-                st.session_state.descrip_6_de = ""
-                st.session_state.descrip_6_es = ""
-                
-            if slider_number >= 7 and st.session_state["route_7"] == False:
-                st.subheader("Description "+st.session_state['option7a']+" to "+st.session_state['option7b'])
-                with st.container():
-                    coli1f, coli2f, coli3f =st.columns([1,1,1])
-                    st.session_state.descrip_7_en = coli1f.text_area("English", key="descrip_7_enx")
-                    st.session_state.descrip_7_de = coli2f.text_area("Deutsch", key="descrip_7_dex")
-                    st.session_state.descrip_7_es = coli3f.text_area("Spanish", key="descrip_7_esx")  
-            if  st.session_state["route_7"] != False:
-                st.session_state.descrip_7_en = ""
-                st.session_state.descrip_7_de = ""
-                st.session_state.descrip_7_es = ""
-                
-            if slider_number >= 8 and st.session_state["route_8"] == False:
-                st.subheader("Description "+st.session_state['option8a']+" to "+st.session_state['option8b'])
-                with st.container():
-                    coli1g, coli2g, coli3g =st.columns([1,1,1])
-                    st.session_state.descrip_8_en = coli1g.text_area("English", key="descrip_8_enx")
-                    st.session_state.descrip_8_de = coli2g.text_area("Deutsch", key="descrip_8_dex")
-                    st.session_state.descrip_8_es = coli3g.text_area("Spanish", key="descrip_8_esx")  
-            if  st.session_state["route_8"] != False:
-                st.session_state.descrip_8_en = ""
-                st.session_state.descrip_8_de = ""
-                st.session_state.descrip_8_es = ""
-                
-            if slider_number >= 9 and st.session_state["route_9"] == False:
-                st.subheader("Description "+st.session_state['option9a']+" to "+st.session_state['option9b'])
-                with st.container():
-                    coli1h, coli2h, coli3h =st.columns([1,1,1])
-                    st.session_state.descrip_9_en = coli1h.text_area("English", key="descrip_9_enx")
-                    st.session_state.descrip_9_de = coli2h.text_area("Deutsch", key="descrip_9_dex")
-                    st.session_state.descrip_9_es = coli3h.text_area("Spanish", key="descrip_9_esx")  
-            if  st.session_state["route_9"] != False:
-                st.session_state.descrip_9_en = ""
-                st.session_state.descrip_9_de = ""
-                st.session_state.descrip_9_es = ""
-                
-            if slider_number >= 10 and st.session_state["route_10"] == False:
-                st.subheader("Description "+st.session_state['option10a']+" to "+st.session_state['option10b'])
-                with st.container():
-                    coli1i, coli2i, coli3i =st.columns([1,1,1])
-                    st.session_state.descrip_10_en = coli1i.text_area("English", key="descrip_10_enx")
-                    st.session_state.descrip_10_de = coli2i.text_area("Deutsch", key="descrip_10_dex")
-                    st.session_state.descrip_10_es = coli3i.text_area("Spanish", key="descrip_10_esx")  
-            if  st.session_state["route_10"] != False:
-                st.session_state.descrip_10_en = ""
-                st.session_state.descrip_10_de = ""
-                st.session_state.descrip_10_es = ""
-
-
-
-
+                        crear_transporte(complete_data, x)
+            
 
 
         if activities_option=="Edit":
