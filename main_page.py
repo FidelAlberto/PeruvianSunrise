@@ -155,9 +155,9 @@ function onRowDragMove(event) {
 
 
 # Connection to MongoDB since applicacion in streamlit cloud
-cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+# cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
 # Connection to MongoDB since applicacion in local
-# cluster = pymongo.MongoClient("mongodb://localhost:27017/")
+cluster = pymongo.MongoClient("mongodb://localhost:27017/")
 db = cluster["peruviansunrise"]
 
 # FIN
@@ -4905,503 +4905,510 @@ if menu_sidebar=="Crear programa":
     
 
 
-
-        def activities_and_transport_program(lugares, index, default_value):
-            if 'data_location_act'+index not in st.session_state:
-                st.session_state["data_location_act"+index] = [] #!esto debe de estar asi o generara errores, cuidado!
-            if "lugares_pasado_act"+index not in st.session_state:
-                st.session_state["lugares_pasado_act"+index] = [""]
-            
-        
-            def update_all():
-                st.session_state["bundlelocation_act"+index] = st.session_state["data_location_act"+index]
+        try:
+            def activities_and_transport_program(lugares, index, default_value):
+                if 'data_location_act'+index not in st.session_state:
+                    st.session_state["data_location_act"+index] = [] #!esto debe de estar asi o generara errores, cuidado!
+                if "lugares_pasado_act"+index not in st.session_state:
+                    st.session_state["lugares_pasado_act"+index] = [""]
                 
-            # Pedir datos de mongo db para  obtener los nombres de las actividades
-            collection_location = db["locations"]
-            data = collection_location.find({},{"Name_en":1})
             
-            list_activities = []
-            for value in data:
-                list_activities.append(value["Name_en"])
-            # fin
-            lugares = st.multiselect("Choose the location",list_activities, default= lugares,  key= "lugarcitos"+index, on_change=update_all)
-        
-            if lugares == []:
-                st.stop()
-            st.session_state.lugares_actual = lugares
-            
-            # Pedir datos de mongo db para  obtener los nombres de las actividades
-            collection = db["activities"]
-            data = collection.find({},{"Name_en":1, "Operator":1,"_id":1, "Location":1})
-            
-            list_activities = [""]
-            ids_activities = [""]
-            transporte = [""]
-
-            for value in data:
-                g = [i for i in value["Location"] if i in lugares]
-                if len(g) > 0:
-                    list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
-                    ids_activities.append(value["_id"])
-                    transporte.append("X")
-            
-            # Pedir datos de mongo db para  obtener los nombres de los transportes
-            collection = db["transport"]
-            data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
-            for value in data:
+                def update_all():
+                    st.session_state["bundlelocation_act"+index] = st.session_state["data_location_act"+index]
+                    
+                # Pedir datos de mongo db para  obtener los nombres de las actividades
+                collection_location = db["locations"]
+                data = collection_location.find({},{"Name_en":1})
                 
-                g1 = [i for i in value["route1"] if i in lugares]
-                g2 = [i for i in value["route2"] if i in lugares]
-                g3 = [i for i in value["route3"] if i in lugares]
-                g4 = [i for i in value["route4"] if i in lugares]
-                g5 = [i for i in value["route5"] if i in lugares]
-                g6 = [i for i in value["route6"] if i in lugares]
-                g7 = [i for i in value["route7"] if i in lugares]
-                g8 = [i for i in value["route8"] if i in lugares]
-                g9 = [i for i in value["route9"] if i in lugares]
-                g10 = [i for i in value["route10"] if i in lugares]
-                final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
-                if len(final)>0:
-                    list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
-                    transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
-                    ids_activities.append(value["_id"])
-                    if len(final)>=2:
-                        list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
-                        transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
-                        ids_activities.append(value["_id"])
-                        if len(final)>=3:
-                            list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
-                            transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
-                            ids_activities.append(value["_id"])
-                            if len(final)>=4:
-                                list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
-                                transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
-                                ids_activities.append(value["_id"])
-                                if len(final)>=5:
-                                    list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
-                                    transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
-                                    ids_activities.append(value["_id"])
-                                    if len(final)>=6:
-                                        list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
-                                        transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
-                                        ids_activities.append(value["_id"])
-                                        if len(final)>=7:
-                                            list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
-                                            transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
-                                            ids_activities.append(value["_id"])
-                                            if len(final)>=8:
-                                                list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
-                                                transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
-                                                ids_activities.append(value["_id"])
-                                                if len(final)>=9:
-                                                    list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
-                                                    transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
-                                                    ids_activities.append(value["_id"])
-                                                    if len(final)>=10:
-                                                        list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
-                                                        transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
-                                                        ids_activities.append(value["_id"])
-        
-            #! Nueva forma de hacer
+                list_activities = []
+                for value in data:
+                    list_activities.append(value["Name_en"])
+                # fin
+                lugares = st.multiselect("Choose the location",list_activities, default= lugares,  key= "lugarcitos"+index, on_change=update_all)
             
-            #! Fin
-            with st.expander('Select values', expanded=True):
-                col1, col2 = st.columns(2)
-                with col1:
-
-                    st.subheader("Activities & Transport")
-                    from streamlit_sortables import sort_items
-
-                    original_items = list_activities
-                    # sorted_items = sort_items(original_items)
-
-                    # st.write(f'original_items: {original_items}')
-                    # st.write(f'sorted_items: {sorted_items}')
-                    if "data_sort_act"+index not in st.session_state:
-                        st.session_state["data_sort_act"+index] = []
-                    if "modified_sort_act"+index  not in st.session_state:
-                        st.session_state["modified_sort_act"+index] = []
-                    if "actual_sort_act"+index  not in st.session_state:
-                        st.session_state["actual_sort_act"+index] = []
-
-                    if "counter" not in st.session_state:
-                        st.session_state.counter = 0
-                        st.experimental_rerun()
-
-                    def data_changed_act():
-                        for x in st.session_state["actual_sort_act"+index]:
-                            if x not in st.session_state["data_sort_act"+index]:
-                                st.session_state["data_sort_act"+index].append(x)
-                        for x in st.session_state["data_sort_act"+index]:
-                            if x not in st.session_state["actual_sort_act"+index]:
-                                st.session_state["data_sort_act"+index].remove(x)
-                        st.session_state["modified_sort_act"+index] = st.session_state["data_sort_act"+index]
-                    values = st.multiselect("Select values", original_items, default= default_value, key="bundlelocation_act"+index, on_change=data_changed_act )
-                    st.session_state["data_location_act"+index] = values
-                    if len(values)=="":
-                            st.stop()
-                
-                with col2.container():
-                    st.subheader("Reorder the activities")
-                    st.write("Drag and drop the activities to reorder them")
-                    st.session_state.counter += 1
-                    st.session_state["actual_sort_act"+index] = values 
-
-                    if st.session_state["actual_sort_act"+index] == [original_items[0]]:
-                        
-                        sorted_items = sort_items(st.session_state["actual_sort_act"+index] )
-                        st.session_state["data_sort_act"+index]= sorted_items
-                    else:    
-                        listita = []
-                        for x in st.session_state["actual_sort_act"+index]:
-                            if x not in st.session_state["data_sort_act"+index]:
-                                st.session_state["modified_sort_act"+index].append(x)
-                        for x in st.session_state["data_sort_act"+index]:
-                            if x not in st.session_state["actual_sort_act"+index]:
-                                st.session_state["data_sort_act"+index].remove(x)
-                        sorted_items = sort_items(st.session_state["modified_sort_act"+index] + listita, key="govitta"+index)
-                        st.session_state["data_sort_act"+index] = sorted_items
-                    # # eliminar  el "" valor inicial
-                    # if st.session_state.counter==1:
-                    #     del st.session_state.data_sort[0]
-                    elegir_actividad = st.session_state["data_sort_act"+index]
-            
-                if elegir_actividad ==None or elegir_actividad==[]:
+                if lugares == []:
                     st.stop()
+                st.session_state.lugares_actual = lugares
                 
-                else:
-                    #! crear la funcion para crear todos los modelos de actividades 
-                    def crear_actividad(data):
-                        co1, co2, co3 = st.columns((2,2,1))
-                        co2.subheader(data["Name_en"])
-                        st.write(data["Description_en"])
+                # Pedir datos de mongo db para  obtener los nombres de las actividades
+                collection = db["activities"]
+                data = collection.find({},{"Name_en":1, "Operator":1,"_id":1, "Location":1})
+                
+                list_activities = [""]
+                ids_activities = [""]
+                transporte = [""]
 
-                    #! crear la funcion para crear todos los modelos para el transporte
-                    def crear_transporte(data, number):
-                        
-                        co1, co2= st.columns((0.75,2))
-                        order_activity = list_activities.index(elegir_actividad[number])
-                        transporte_title = transporte[order_activity]
-                        co2.subheader(transporte_title)
-                        st.write(data["notes price"])
-                        
-                    if elegir_actividad != [""]:
-                        for x in range(len(elegir_actividad)):
-                            order_activity = list_activities.index(elegir_actividad[x])
-                            code = ids_activities[order_activity]
+                for value in data:
+                    g = [i for i in value["Location"] if i in lugares]
+                    if len(g) > 0:
+                        list_activities.append(value["Name_en"] + " (" + value["Operator"]+ ")")
+                        ids_activities.append(value["_id"])
+                        transporte.append("X")
+                
+                # Pedir datos de mongo db para  obtener los nombres de los transportes
+                collection = db["transport"]
+                data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
+                for value in data:
+                    
+                    g1 = [i for i in value["route1"] if i in lugares]
+                    g2 = [i for i in value["route2"] if i in lugares]
+                    g3 = [i for i in value["route3"] if i in lugares]
+                    g4 = [i for i in value["route4"] if i in lugares]
+                    g5 = [i for i in value["route5"] if i in lugares]
+                    g6 = [i for i in value["route6"] if i in lugares]
+                    g7 = [i for i in value["route7"] if i in lugares]
+                    g8 = [i for i in value["route8"] if i in lugares]
+                    g9 = [i for i in value["route9"] if i in lugares]
+                    g10 = [i for i in value["route10"] if i in lugares]
+                    final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
+                    if len(final)>0:
+                        list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
+                        transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
+                        ids_activities.append(value["_id"])
+                        if len(final)>=2:
+                            list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
+                            transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
+                            ids_activities.append(value["_id"])
+                            if len(final)>=3:
+                                list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
+                                transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
+                                ids_activities.append(value["_id"])
+                                if len(final)>=4:
+                                    list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
+                                    transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
+                                    ids_activities.append(value["_id"])
+                                    if len(final)>=5:
+                                        list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
+                                        transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
+                                        ids_activities.append(value["_id"])
+                                        if len(final)>=6:
+                                            list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
+                                            transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
+                                            ids_activities.append(value["_id"])
+                                            if len(final)>=7:
+                                                list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
+                                                transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
+                                                ids_activities.append(value["_id"])
+                                                if len(final)>=8:
+                                                    list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
+                                                    transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
+                                                    ids_activities.append(value["_id"])
+                                                    if len(final)>=9:
+                                                        list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
+                                                        transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                        ids_activities.append(value["_id"])
+                                                        if len(final)>=10:
+                                                            list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
+                                                            transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                            ids_activities.append(value["_id"])
+            
+                #! Nueva forma de hacer
+                
+                #! Fin
+                with st.expander('Select values', expanded=True):
+                    col1, col2 = st.columns(2)
+                    with col1:
+
+                        st.subheader("Activities & Transport")
+                        from streamlit_sortables import sort_items
+
+                        original_items = list_activities
+                        # sorted_items = sort_items(original_items)
+
+                        # st.write(f'original_items: {original_items}')
+                        # st.write(f'sorted_items: {sorted_items}')
+                        if "data_sort_act"+index not in st.session_state:
+                            st.session_state["data_sort_act"+index] = []
+                        if "modified_sort_act"+index  not in st.session_state:
+                            st.session_state["modified_sort_act"+index] = []
+                        if "actual_sort_act"+index  not in st.session_state:
+                            st.session_state["actual_sort_act"+index] = []
+
+                        if "counter" not in st.session_state:
+                            st.session_state.counter = 0
+                            st.experimental_rerun()
+
+                        def data_changed_act():
+                            for x in st.session_state["actual_sort_act"+index]:
+                                if x not in st.session_state["data_sort_act"+index]:
+                                    st.session_state["data_sort_act"+index].append(x)
+                            for x in st.session_state["data_sort_act"+index]:
+                                if x not in st.session_state["actual_sort_act"+index]:
+                                    st.session_state["data_sort_act"+index].remove(x)
+                            st.session_state["modified_sort_act"+index] = st.session_state["data_sort_act"+index]
+                        values = st.multiselect("Select values", original_items, default= default_value, key="bundlelocation_act"+index, on_change=data_changed_act )
+                        st.session_state["data_location_act"+index] = values
+                        if len(values)=="":
+                                st.stop()
+                    
+                    with col2.container():
+                        st.subheader("Reorder the activities")
+                        st.write("Drag and drop the activities to reorder them")
+                        st.session_state.counter += 1
+                        st.session_state["actual_sort_act"+index] = values 
+
+                        if st.session_state["actual_sort_act"+index] == [original_items[0]]:
                             
-                            collection = db["activities"]
-                            complete_data = collection.find_one({"_id":code})
-                            # en este caso es una actividad
-                            if complete_data != None:
-                                
-                                crear_actividad(complete_data)
-
-                            if complete_data == None:
-                                collection = db["transport"]
-                                complete_data = collection.find_one({"_id":code})                
-                                
-                                crear_transporte(complete_data, x)
-                    else:
-                        return elegir_actividad
-
-            return elegir_actividad
-        
-        cantidad_dias = len(st.session_state.days_places_base_program)
-        
-
-        # Inicializar variables para guardar data
-        if "contador_act_trans" not in st.session_state:
-            st.session_state.contador_act_trans = 1
-        
-
-        if "data_boom_1" not in st.session_state:
-            st.session_state.data_boom_1 = None
-        if "data_boom_2" not in st.session_state:
-            st.session_state.data_boom_2 = None
-        if "data_boom_3" not in st.session_state:
-            st.session_state.data_boom_3 = None
-        if "data_boom_4" not in st.session_state:
-            st.session_state.data_boom_4 = None
-        if "data_boom_5" not in st.session_state:
-            st.session_state.data_boom_5 = None
-        if "data_boom_6" not in st.session_state:
-            st.session_state.data_boom_6 = None
-        if "data_boom_7" not in st.session_state:
-            st.session_state.data_boom_7 = None
-        if "data_boom_8" not in st.session_state:
-            st.session_state.data_boom_8 = None
-        if "data_boom_9" not in st.session_state:
-            st.session_state.data_boom_9 = None
-        if "data_boom_10" not in st.session_state:
-            st.session_state.data_boom_10 = None
-        if "data_boom_11" not in st.session_state:
-            st.session_state.data_boom_11 = None
-        if "data_boom_12" not in st.session_state:
-            st.session_state.data_boom_12 = None
-        if "data_boom_13" not in st.session_state:
-            st.session_state.data_boom_13 = None
-        if "data_boom_14" not in st.session_state:
-            st.session_state.data_boom_14 = None
-        if "data_boom_15" not in st.session_state:
-            st.session_state.data_boom_15 = None
-        if "data_boom_16" not in st.session_state:
-            st.session_state.data_boom_16 = None
-        if "data_boom_17" not in st.session_state:
-            st.session_state.data_boom_17 = None
-        if "data_boom_18" not in st.session_state:
-            st.session_state.data_boom_18 = None
-        if "data_boom_19" not in st.session_state:
-            st.session_state.data_boom_19 = None
-        if "data_boom_20" not in st.session_state:
-            st.session_state.data_boom_20 = None
-        if "data_boom_21" not in st.session_state:
-            st.session_state.data_boom_21 = None
-        if "data_boom_22" not in st.session_state:
-            st.session_state.data_boom_22 = None
-        if "data_boom_23" not in st.session_state:
-            st.session_state.data_boom_23 = None
-        if "data_boom_24" not in st.session_state:
-            st.session_state.data_boom_24 = None
-        if "data_boom_25" not in st.session_state:
-            st.session_state.data_boom_25 = None
-        if "data_boom_26" not in st.session_state:
-            st.session_state.data_boom_26 = None
-        if "data_boom_27" not in st.session_state:
-            st.session_state.data_boom_27 = None
-        if "data_boom_28" not in st.session_state:
-            st.session_state.data_boom_28 = None
-        if "data_boom_29" not in st.session_state:
-            st.session_state.data_boom_29 = None
-        if "data_boom_30" not in st.session_state:
-            st.session_state.data_boom_30 = None
-        if "data_boom_31" not in st.session_state:
-            st.session_state.data_boom_31 = None
-        if "data_boom_32" not in st.session_state:
-            st.session_state.data_boom_32 = None
-        if "data_boom_33" not in st.session_state:
-            st.session_state.data_boom_33 = None
-        if "data_boom_34" not in st.session_state:
-            st.session_state.data_boom_34 = None
-        if "data_boom_35" not in st.session_state:
-            st.session_state.data_boom_35 = None
-        if "data_boom_36" not in st.session_state:
-            st.session_state.data_boom_36 = None
-        if "data_boom_37" not in st.session_state:
-            st.session_state.data_boom_37 = None
-        if "data_boom_38" not in st.session_state:
-            st.session_state.data_boom_38 = None
-        if "data_boom_39" not in st.session_state:
-            st.session_state.data_boom_39 = None
-        if "data_boom_40" not in st.session_state:
-            st.session_state.data_boom_40 = None
-        if "data_boom_41" not in st.session_state:
-            st.session_state.data_boom_41 = None
-        if "data_boom_42" not in st.session_state:
-            st.session_state.data_boom_42 = None
-        if "data_boom_43" not in st.session_state:
-            st.session_state.data_boom_43 = None
-        if "data_boom_44" not in st.session_state:
-            st.session_state.data_boom_44 = None
-        if "data_boom_45" not in st.session_state:
-            st.session_state.data_boom_45 = None
-        if "data_boom_46" not in st.session_state:
-            st.session_state.data_boom_46 = None
-        if "data_boom_47" not in st.session_state:
-            st.session_state.data_boom_47 = None
-        if "data_boom_48" not in st.session_state:
-            st.session_state.data_boom_48 = None
-        if "data_boom_49" not in st.session_state:
-            st.session_state.data_boom_49 = None
-        if "data_boom_50" not in st.session_state:
-            st.session_state.data_boom_50 = None
-
-
-        if cantidad_dias >= 1:
-            lugares = ""
-            for  lugar in st.session_state.days_places_base_program[0]:
-                lugares+=lugar+" - "
-            lugares = lugares[:-3]
-            st.markdown("## DAY 1"+" - "+str(lugares))
-            if st.session_state.contador_act_trans == 1:
-                data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), None)
-                st.session_state.data_boom_1 = data_1
-            elif st.session_state.contador_act_trans != 1 :
-                data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), st.session_state.data_boom_1)
-                st.session_state.data_boom_1 = data_1
+                            sorted_items = sort_items(st.session_state["actual_sort_act"+index] )
+                            st.session_state["data_sort_act"+index]= sorted_items
+                        else:    
+                            listita = []
+                            for x in st.session_state["actual_sort_act"+index]:
+                                if x not in st.session_state["data_sort_act"+index]:
+                                    st.session_state["modified_sort_act"+index].append(x)
+                            for x in st.session_state["data_sort_act"+index]:
+                                if x not in st.session_state["actual_sort_act"+index]:
+                                    st.session_state["data_sort_act"+index].remove(x)
+                            sorted_items = sort_items(st.session_state["modified_sort_act"+index] + listita, key=None)
+                            st.session_state["data_sort_act"+index] = sorted_items
+                        # # eliminar  el "" valor inicial
+                        # if st.session_state.counter==1:
+                        #     del st.session_state.data_sort[0]
+                        elegir_actividad = st.session_state["data_sort_act"+index]
                 
-            if cantidad_dias >= 2:
+                    if elegir_actividad ==None or elegir_actividad==[]:
+                        st.stop()
+                    
+                    else:
+                        #! crear la funcion para crear todos los modelos de actividades 
+                        def crear_actividad(data):
+                            co1, co2, co3 = st.columns((2,2,1))
+                            co2.subheader(data["Name_en"])
+                            st.write(data["Description_en"])
+
+                        #! crear la funcion para crear todos los modelos para el transporte
+                        def crear_transporte(data, number):
+                            
+                            co1, co2= st.columns((0.75,2))
+                            order_activity = list_activities.index(elegir_actividad[number])
+                            transporte_title = transporte[order_activity]
+                            co2.subheader(transporte_title)
+                            st.write(data["notes price"])
+                            
+                        if elegir_actividad != [""]:
+                            for x in range(len(elegir_actividad)):
+                                order_activity = list_activities.index(elegir_actividad[x])
+                                code = ids_activities[order_activity]
+                                
+                                collection = db["activities"]
+                                complete_data = collection.find_one({"_id":code})
+                                # en este caso es una actividad
+                                if complete_data != None:
+                                    
+                                    crear_actividad(complete_data)
+
+                                if complete_data == None:
+                                    collection = db["transport"]
+                                    complete_data = collection.find_one({"_id":code})                
+                                    
+                                    crear_transporte(complete_data, x)
+                        else:
+                            return elegir_actividad
+
+                return elegir_actividad
+            
+            cantidad_dias = len(st.session_state.days_places_base_program)
+            
+
+            # Inicializar variables para guardar data
+            if "contador_act_trans" not in st.session_state:
+                st.session_state.contador_act_trans = 1
+            
+
+            if "data_boom_1" not in st.session_state:
+                st.session_state.data_boom_1 = None
+            if "data_boom_2" not in st.session_state:
+                st.session_state.data_boom_2 = None
+            if "data_boom_3" not in st.session_state:
+                st.session_state.data_boom_3 = None
+            if "data_boom_4" not in st.session_state:
+                st.session_state.data_boom_4 = None
+            if "data_boom_5" not in st.session_state:
+                st.session_state.data_boom_5 = None
+            if "data_boom_6" not in st.session_state:
+                st.session_state.data_boom_6 = None
+            if "data_boom_7" not in st.session_state:
+                st.session_state.data_boom_7 = None
+            if "data_boom_8" not in st.session_state:
+                st.session_state.data_boom_8 = None
+            if "data_boom_9" not in st.session_state:
+                st.session_state.data_boom_9 = None
+            if "data_boom_10" not in st.session_state:
+                st.session_state.data_boom_10 = None
+            if "data_boom_11" not in st.session_state:
+                st.session_state.data_boom_11 = None
+            if "data_boom_12" not in st.session_state:
+                st.session_state.data_boom_12 = None
+            if "data_boom_13" not in st.session_state:
+                st.session_state.data_boom_13 = None
+            if "data_boom_14" not in st.session_state:
+                st.session_state.data_boom_14 = None
+            if "data_boom_15" not in st.session_state:
+                st.session_state.data_boom_15 = None
+            if "data_boom_16" not in st.session_state:
+                st.session_state.data_boom_16 = None
+            if "data_boom_17" not in st.session_state:
+                st.session_state.data_boom_17 = None
+            if "data_boom_18" not in st.session_state:
+                st.session_state.data_boom_18 = None
+            if "data_boom_19" not in st.session_state:
+                st.session_state.data_boom_19 = None
+            if "data_boom_20" not in st.session_state:
+                st.session_state.data_boom_20 = None
+            if "data_boom_21" not in st.session_state:
+                st.session_state.data_boom_21 = None
+            if "data_boom_22" not in st.session_state:
+                st.session_state.data_boom_22 = None
+            if "data_boom_23" not in st.session_state:
+                st.session_state.data_boom_23 = None
+            if "data_boom_24" not in st.session_state:
+                st.session_state.data_boom_24 = None
+            if "data_boom_25" not in st.session_state:
+                st.session_state.data_boom_25 = None
+            if "data_boom_26" not in st.session_state:
+                st.session_state.data_boom_26 = None
+            if "data_boom_27" not in st.session_state:
+                st.session_state.data_boom_27 = None
+            if "data_boom_28" not in st.session_state:
+                st.session_state.data_boom_28 = None
+            if "data_boom_29" not in st.session_state:
+                st.session_state.data_boom_29 = None
+            if "data_boom_30" not in st.session_state:
+                st.session_state.data_boom_30 = None
+            if "data_boom_31" not in st.session_state:
+                st.session_state.data_boom_31 = None
+            if "data_boom_32" not in st.session_state:
+                st.session_state.data_boom_32 = None
+            if "data_boom_33" not in st.session_state:
+                st.session_state.data_boom_33 = None
+            if "data_boom_34" not in st.session_state:
+                st.session_state.data_boom_34 = None
+            if "data_boom_35" not in st.session_state:
+                st.session_state.data_boom_35 = None
+            if "data_boom_36" not in st.session_state:
+                st.session_state.data_boom_36 = None
+            if "data_boom_37" not in st.session_state:
+                st.session_state.data_boom_37 = None
+            if "data_boom_38" not in st.session_state:
+                st.session_state.data_boom_38 = None
+            if "data_boom_39" not in st.session_state:
+                st.session_state.data_boom_39 = None
+            if "data_boom_40" not in st.session_state:
+                st.session_state.data_boom_40 = None
+            if "data_boom_41" not in st.session_state:
+                st.session_state.data_boom_41 = None
+            if "data_boom_42" not in st.session_state:
+                st.session_state.data_boom_42 = None
+            if "data_boom_43" not in st.session_state:
+                st.session_state.data_boom_43 = None
+            if "data_boom_44" not in st.session_state:
+                st.session_state.data_boom_44 = None
+            if "data_boom_45" not in st.session_state:
+                st.session_state.data_boom_45 = None
+            if "data_boom_46" not in st.session_state:
+                st.session_state.data_boom_46 = None
+            if "data_boom_47" not in st.session_state:
+                st.session_state.data_boom_47 = None
+            if "data_boom_48" not in st.session_state:
+                st.session_state.data_boom_48 = None
+            if "data_boom_49" not in st.session_state:
+                st.session_state.data_boom_49 = None
+            if "data_boom_50" not in st.session_state:
+                st.session_state.data_boom_50 = None
+
+
+            if cantidad_dias >= 1:
                 lugares = ""
-                for  lugar in st.session_state.days_places_base_program[1]:
+                for  lugar in st.session_state.days_places_base_program[0]:
                     lugares+=lugar+" - "
                 lugares = lugares[:-3]
-                st.markdown("## DAY 2"+" - "+str(lugares))
-                if st.session_state.contador_act_trans ==1:
-                    data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), None)
-                    st.session_state.data_boom_2 = data_2
-                elif st.session_state.contador_act_trans != 1:
-                    data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), st.session_state.data_boom_2)
-                    st.session_state.data_boom_2 = data_2
+                st.markdown("## DAY 1"+" - "+str(lugares))
+                if st.session_state.contador_act_trans == 1:
+                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), None)
+                    st.session_state.data_boom_1 = data_1
+                    
+                elif st.session_state.contador_act_trans != 1 :
+                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), st.session_state.data_boom_1)
+                    st.session_state.data_boom_1 = data_1
                 
-                if cantidad_dias >= 3:  
+                if cantidad_dias >= 2:
                     lugares = ""
-                    for  lugar in st.session_state.days_places_base_program[2]:
+                    for  lugar in st.session_state.days_places_base_program[1]:
                         lugares+=lugar+" - "
                     lugares = lugares[:-3]
-                    st.markdown("## DAY 3"+" - "+str(lugares))
+                    st.markdown("## DAY 2"+" - "+str(lugares))
                     if st.session_state.contador_act_trans ==1:
-                        data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), None)
-                        st.session_state.data_boom_3 = data_3
+                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), None)
+                        st.session_state.data_boom_2 = data_2
+                        
                     elif st.session_state.contador_act_trans != 1:
-                        data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), st.session_state.data_boom_3)
-                        st.session_state.data_boom_3 = data_3
+                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), st.session_state.data_boom_2)
+                        st.session_state.data_boom_2 = data_2
                     
-                    if cantidad_dias >= 4:
+                    if cantidad_dias >= 3:  
                         lugares = ""
-                        for  lugar in st.session_state.days_places_base_program[3]:
+                        for  lugar in st.session_state.days_places_base_program[2]:
                             lugares+=lugar+" - "
                         lugares = lugares[:-3]
-                        st.markdown("## DAY 4"+" - "+str(lugares))
+                        st.markdown("## DAY 3"+" - "+str(lugares))
                         if st.session_state.contador_act_trans ==1:
-                            data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), None)
-                            st.session_state.data_boom_4 = data_4
+                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), None)
+                            st.session_state.data_boom_3 = data_3
+                            
                         elif st.session_state.contador_act_trans != 1:
-                            data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), st.session_state.data_boom_4)
-                            st.session_state.data_boom_4 = data_4
+                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), st.session_state.data_boom_3)
+                            st.session_state.data_boom_3 = data_3
                         
-                        if cantidad_dias >= 5:
+                        if cantidad_dias >= 4:
                             lugares = ""
-                            for  lugar in st.session_state.days_places_base_program[4]:
+                            for  lugar in st.session_state.days_places_base_program[3]:
                                 lugares+=lugar+" - "
                             lugares = lugares[:-3]
-                            st.markdown("## DAY 5"+" - "+str(lugares))
+                            st.markdown("## DAY 4"+" - "+str(lugares))
                             if st.session_state.contador_act_trans ==1:
-                                data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), None)
-                                st.session_state.data_boom_5 = data_5
+                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), None)
+                                st.session_state.data_boom_4 = data_4
+                                
                             elif st.session_state.contador_act_trans != 1:
-                                data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), st.session_state.data_boom_5)
-                                st.session_state.data_boom_5 = data_5
+                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), st.session_state.data_boom_4)
+                                st.session_state.data_boom_4 = data_4
                             
-                            if cantidad_dias >= 6:
+                            if cantidad_dias >= 5:
                                 lugares = ""
-                                for  lugar in st.session_state.days_places_base_program[5]:
+                                for  lugar in st.session_state.days_places_base_program[4]:
                                     lugares+=lugar+" - "
                                 lugares = lugares[:-3]
-                                st.markdown("## DAY 6"+" - "+str(lugares))
+                                st.markdown("## DAY 5"+" - "+str(lugares))
                                 if st.session_state.contador_act_trans ==1:
-                                    data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), None)
-                                    st.session_state.data_boom_6 = data_6
+                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), None)
+                                    st.session_state.data_boom_5 = data_5
                                 elif st.session_state.contador_act_trans != 1:
-                                    data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), st.session_state.data_boom_6)
-                                    st.session_state.data_boom_6 = data_6
+                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), st.session_state.data_boom_5)
+                                    st.session_state.data_boom_5 = data_5
                                 
-                                if cantidad_dias >= 7:
+                                if cantidad_dias >= 6:
                                     lugares = ""
-                                    for  lugar in st.session_state.days_places_base_program[6]:
+                                    for  lugar in st.session_state.days_places_base_program[5]:
                                         lugares+=lugar+" - "
                                     lugares = lugares[:-3]
-                                    st.markdown("## DAY 7"+" - "+str(lugares))
+                                    st.markdown("## DAY 6"+" - "+str(lugares))
                                     if st.session_state.contador_act_trans ==1:
-                                        data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), None)
-                                        st.session_state.data_boom_7 = data_7
+                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), None)
+                                        st.session_state.data_boom_6 = data_6
                                     elif st.session_state.contador_act_trans != 1:
-                                        data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), st.session_state.data_boom_7)
-                                        st.session_state.data_boom_7 = data_7
+                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), st.session_state.data_boom_6)
+                                        st.session_state.data_boom_6 = data_6
                                     
-                                    if cantidad_dias >= 8:
+                                    if cantidad_dias >= 7:
                                         lugares = ""
-                                        for  lugar in st.session_state.days_places_base_program[7]:
+                                        for  lugar in st.session_state.days_places_base_program[6]:
                                             lugares+=lugar+" - "
                                         lugares = lugares[:-3]
-                                        st.markdown("## DAY 8"+" - "+str(lugares))
+                                        st.markdown("## DAY 7"+" - "+str(lugares))
                                         if st.session_state.contador_act_trans ==1:
-                                            data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), None)
-                                            st.session_state.data_boom_8 = data_8
+                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), None)
+                                            st.session_state.data_boom_7 = data_7
                                         elif st.session_state.contador_act_trans != 1:
-                                            data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), st.session_state.data_boom_8)
-                                            st.session_state.data_boom_8 = data_8
+                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), st.session_state.data_boom_7)
+                                            st.session_state.data_boom_7 = data_7
                                         
-                                        if cantidad_dias >= 9:
+                                        if cantidad_dias >= 8:
                                             lugares = ""
-                                            for  lugar in st.session_state.days_places_base_program[8]:
+                                            for  lugar in st.session_state.days_places_base_program[7]:
                                                 lugares+=lugar+" - "
                                             lugares = lugares[:-3]
-                                            st.markdown("## DAY 9"+" - "+str(lugares))
+                                            st.markdown("## DAY 8"+" - "+str(lugares))
                                             if st.session_state.contador_act_trans ==1:
-                                                data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), None)
-                                                st.session_state.data_boom_9 = data_9
+                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), None)
+                                                st.session_state.data_boom_8 = data_8
                                             elif st.session_state.contador_act_trans != 1:
-                                                data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), st.session_state.data_boom_9)
-                                                st.session_state.data_boom_9 = data_9
+                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), st.session_state.data_boom_8)
+                                                st.session_state.data_boom_8 = data_8
                                             
-                                            if cantidad_dias >= 10:
+                                            if cantidad_dias >= 9:
                                                 lugares = ""
-                                                for  lugar in st.session_state.days_places_base_program[9]:
+                                                for  lugar in st.session_state.days_places_base_program[8]:
                                                     lugares+=lugar+" - "
                                                 lugares = lugares[:-3]
-                                                st.markdown("## DAY 10"+" - "+str(lugares))
+                                                st.markdown("## DAY 9"+" - "+str(lugares))
                                                 if st.session_state.contador_act_trans ==1:
-                                                    data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), None)
-                                                    st.session_state.data_boom_10 = data_10
+                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), None)
+                                                    st.session_state.data_boom_9 = data_9
                                                 elif st.session_state.contador_act_trans != 1:
-                                                    data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), st.session_state.data_boom_10)
-                                                    st.session_state.data_boom_10 = data_10
+                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), st.session_state.data_boom_9)
+                                                    st.session_state.data_boom_9 = data_9
                                                 
-                                                if cantidad_dias >= 11:
+                                                if cantidad_dias >= 10:
                                                     lugares = ""
-                                                    for  lugar in st.session_state.days_places_base_program[10]:
+                                                    for  lugar in st.session_state.days_places_base_program[9]:
                                                         lugares+=lugar+" - "
                                                     lugares = lugares[:-3]
-                                                    st.markdown("## DAY 11"+" - "+str(lugares))
+                                                    st.markdown("## DAY 10"+" - "+str(lugares))
                                                     if st.session_state.contador_act_trans ==1:
-                                                        data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), None)
-                                                        st.session_state.data_boom_11 = data_11
+                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), None)
+                                                        st.session_state.data_boom_10 = data_10
                                                     elif st.session_state.contador_act_trans != 1:
-                                                        data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), st.session_state.data_boom_11)
-                                                        st.session_state.data_boom_11 = data_11
+                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), st.session_state.data_boom_10)
+                                                        st.session_state.data_boom_10 = data_10
                                                     
-                                                    if cantidad_dias >= 12:
+                                                    if cantidad_dias >= 11:
                                                         lugares = ""
-                                                        for  lugar in st.session_state.days_places_base_program[11]:
+                                                        for  lugar in st.session_state.days_places_base_program[10]:
                                                             lugares+=lugar+" - "
                                                         lugares = lugares[:-3]
-                                                        st.markdown("## DAY 12"+" - "+str(lugares))
+                                                        st.markdown("## DAY 11"+" - "+str(lugares))
                                                         if st.session_state.contador_act_trans ==1:
-                                                            data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), None)
-                                                            st.session_state.data_boom_12 = data_12
+                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), None)
+                                                            st.session_state.data_boom_11 = data_11
                                                         elif st.session_state.contador_act_trans != 1:
-                                                            data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), st.session_state.data_boom_12)
-                                                            st.session_state.data_boom_12 = data_12
+                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), st.session_state.data_boom_11)
+                                                            st.session_state.data_boom_11 = data_11
                                                         
-                                                        if cantidad_dias >= 13:
+                                                        if cantidad_dias >= 12:
                                                             lugares = ""
-                                                            for  lugar in st.session_state.days_places_base_program[12]:
+                                                            for  lugar in st.session_state.days_places_base_program[11]:
                                                                 lugares+=lugar+" - "
                                                             lugares = lugares[:-3]
-                                                            st.markdown("## DAY 13"+" - "+str(lugares))
+                                                            st.markdown("## DAY 12"+" - "+str(lugares))
                                                             if st.session_state.contador_act_trans ==1:
-                                                                data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), None)
-                                                                st.session_state.data_boom_13 = data_13
+                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), None)
+                                                                st.session_state.data_boom_12 = data_12
                                                             elif st.session_state.contador_act_trans != 1:
-                                                                data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), st.session_state.data_boom_13)
-                                                                st.session_state.data_boom_13 = data_13
+                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), st.session_state.data_boom_12)
+                                                                st.session_state.data_boom_12 = data_12
                                                             
-                                                            if cantidad_dias >= 14:
+                                                            if cantidad_dias >= 13:
                                                                 lugares = ""
-                                                                for  lugar in st.session_state.days_places_base_program[13]:
+                                                                for  lugar in st.session_state.days_places_base_program[12]:
                                                                     lugares+=lugar+" - "
                                                                 lugares = lugares[:-3]
-                                                                st.markdown("## DAY 14"+" - "+str(lugares))
+                                                                st.markdown("## DAY 13"+" - "+str(lugares))
                                                                 if st.session_state.contador_act_trans ==1:
-                                                                    data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), None)
-                                                                    st.session_state.data_boom_14 = data_14
+                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), None)
+                                                                    st.session_state.data_boom_13 = data_13
                                                                 elif st.session_state.contador_act_trans != 1:
-                                                                    data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), st.session_state.data_boom_14)
-                                                                    st.session_state.data_boom_14 = data_14
+                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), st.session_state.data_boom_13)
+                                                                    st.session_state.data_boom_13 = data_13
+                                                                
+                                                                if cantidad_dias >= 14:
+                                                                    lugares = ""
+                                                                    for  lugar in st.session_state.days_places_base_program[13]:
+                                                                        lugares+=lugar+" - "
+                                                                    lugares = lugares[:-3]
+                                                                    st.markdown("## DAY 14"+" - "+str(lugares))
+                                                                    if st.session_state.contador_act_trans ==1:
+                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), None)
+                                                                        st.session_state.data_boom_14 = data_14
+                                                                    elif st.session_state.contador_act_trans != 1:
+                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), st.session_state.data_boom_14)
+                                                                        st.session_state.data_boom_14 = data_14
 
-
-        if st.button("Save"):
-            st.session_state.contador_act_trans +=1
+        
+            if st.button("Save"):
+                st.session_state.contador_act_trans +=1
+                st.info("Saved")
+        except:
+            st.write("")
     st.markdown("##")
     st.markdown("##")
     
