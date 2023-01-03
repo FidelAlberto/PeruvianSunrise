@@ -277,101 +277,101 @@
 #? Prueba template titulos, descripciones y descarga de pdf 
 ####################################################
 
-# import streamlit as st
+import streamlit as st
 
-# st.sidebar.write("This is the sidebar")
-# uno = "Dia 1 (Lima es lo mejor) "
+st.sidebar.write("This is the sidebar")
+uno = "Dia 1 (Lima es lo mejor) "
 	
-# def ha(url):
-#     st.markdown(f'<h1 style="color:#33ff33;font-size:24px;">{"ColorMeBlue text”"}</h1>', unsafe_allow_html=True)
-# #ha(uno)
+def ha(url):
+    st.markdown(f'<h1 style="color:#33ff33;font-size:24px;">{"ColorMeBlue text”"}</h1>', unsafe_allow_html=True)
+#ha(uno)
 
-# def basic(dia, actividad, fecha):
-#     uno = "<font size='6'>"+dia+"</font> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font size='6'>"+actividad+"</font> <br/>"+fecha         
-#     return uno
+def basic(dia, actividad, fecha):
+    uno = "<font size='6'>"+dia+"</font> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font size='6'>"+actividad+"</font> <br/>"+fecha         
+    return uno
 
-# # uno = "<font size='6'>DAY 1</font> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font size='6'>CUSCO TO LIMA</font> <br/> Agosto 16 de 2022"    
-# uno = basic("DAY 1", "CUSCO TO LIMA", "Agosto 16 de 2022")
-# dos = basic("DAY 2", "CUSCO TO LIMA", "Agosto 16 de 2022")
-# def fidel(url):
-#      st.markdown(f"""<p style='background-color:#E5E7E9 ;
-#                                         color:black;
-#                                         font-size:18px;
-#                                         border-radius:3px;
-#                                         line-height:30px;
-#                                         padding-top:15px;
-#                                         padding-bottom:15px;
-#                                         padding-left:17px;
-#                                         opacity:1'>
-#                                         {url}</style>
-#                                         <br></p>""", unsafe_allow_html=True)
-# fidel(uno)
+# uno = "<font size='6'>DAY 1</font> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<font size='6'>CUSCO TO LIMA</font> <br/> Agosto 16 de 2022"    
+uno = basic("DAY 1", "CUSCO TO LIMA", "Agosto 16 de 2022")
+dos = basic("DAY 2", "CUSCO TO LIMA", "Agosto 16 de 2022")
+def fidel(url):
+     st.markdown(f"""<p style='background-color:#E5E7E9 ;
+                                        color:black;
+                                        font-size:18px;
+                                        border-radius:3px;
+                                        line-height:30px;
+                                        padding-top:15px;
+                                        padding-bottom:15px;
+                                        padding-left:17px;
+                                        opacity:1'>
+                                        {url}</style>
+                                        <br></p>""", unsafe_allow_html=True)
+fidel(uno)
 
-# st.markdown("##")
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
-# st.markdown("##")
-# fidel(dos)
-# st.markdown("##")
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+st.markdown("##")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+st.markdown("##")
+fidel(dos)
+st.markdown("##")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
     
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
-# with st.container():
-#     col1, col2 = st.columns((1.5,4))
-#     col1.markdown(":smirk:")
-#     col2.subheader("Cusco City Tour (B/L/D) ")
-#     col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
+with st.container():
+    col1, col2 = st.columns((1.5,4))
+    col1.markdown(":smirk:")
+    col2.subheader("Cusco City Tour (B/L/D) ")
+    col2.write("Cuzco es una ciudad de los Andes peruanos que fue la capital del Imperio Inca y es conocida por sus restos arqueológicos y la arquitectura colonial española. La Plaza de Armas es el centro de la ciudad antigua, con galerías, balcones de madera tallada y ruinas de murallas incas. El convento de Santo Domingo, de estilo barroco, se construyó sobre el Templo del Sol inca (Qoricancha) y tiene restos arqueológicos de cantería inca. ")
 
-# st.markdown("##")
-# st.markdown("##")
-# col1, col2, col3 = st.columns(3)
-# col1.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
-# col2.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
-# col3.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
-# st.markdown("##")
-# st.markdown("##")
-# st.markdown("##")
-# st.markdown("##")
-# with st.container():
-#     cal1, cal2 = st.columns((2,1))
-#     cal1.subheader("Lima City Tour (B/L/D) ")
-#     cal1.subheader("★★★★")
-#     cal1.markdown("#")
-#     cal1.write("Lima es la capital de Perú ubicada en la árida costa del Pacífico del país. Pese a que su centro colonial se conserva, es una desbordante metrópolis y una de las ciudades más grandes de Sudamérica. El Museo Larco alberga una colección de arte precolombino y el Museo de la Nación recorre la historia de las civilizaciones antiguas de Perú. La Plaza de Armas y la catedral del siglo XVI son el núcleo del antiguo centro de Lima. ")
-#     cal2.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
+st.markdown("##")
+st.markdown("##")
+col1, col2, col3 = st.columns(3)
+col1.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
+col2.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
+col3.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
+st.markdown("##")
+st.markdown("##")
+st.markdown("##")
+st.markdown("##")
+with st.container():
+    cal1, cal2 = st.columns((2,1))
+    cal1.subheader("Lima City Tour (B/L/D) ")
+    cal1.subheader("★★★★")
+    cal1.markdown("#")
+    cal1.write("Lima es la capital de Perú ubicada en la árida costa del Pacífico del país. Pese a que su centro colonial se conserva, es una desbordante metrópolis y una de las ciudades más grandes de Sudamérica. El Museo Larco alberga una colección de arte precolombino y el Museo de la Nación recorre la historia de las civilizaciones antiguas de Perú. La Plaza de Armas y la catedral del siglo XVI son el núcleo del antiguo centro de Lima. ")
+    cal2.image("https://media.istockphoto.com/id/636641586/es/foto/catedral-de-cuzco-en-el-per%C3%BA.jpg?s=612x612&w=0&k=20&c=j0_-xrQl00fIJjyGEVpxkgLm4b5WJy5fJLMhWCXWuNY=", width=420)
 
-# import autoit
-# import time
-# run = st.button("Imprimir")
-# if run:
-#     #! pip install -U pyautoit
-#     #! https://pypi.org/project/PyAutoIt/
+import autoit
+import time
+run = st.button("Imprimir")
+if run:
+    #! pip install -U pyautoit
+    #! https://pypi.org/project/PyAutoIt/
     
-#     autoit.send("^p")
-#     time.sleep(2)
-#     st.info("Se imprimio")
+    autoit.send("^p")
+    time.sleep(2)
+    st.info("Se imprimio")
 
 
 
@@ -437,65 +437,66 @@
 
 ####################################################
 #? Sorteable elements
-# Lo malo es que cuando se añade nuevos valores se desordena nuevamente
+# https://github.com/ohtaman/streamlit-sortables
+
 ####################################################
-import streamlit as st
-from streamlit_sortables import sort_items
+# import streamlit as st
+# from streamlit_sortables import sort_items
 
 
-original_items = ['A', 'B', 'C', "D", "E", "F"]
-# sorted_items = sort_items(original_items)
+# original_items = ['A', 'B', 'C', "D", "E", "F"]
+# # sorted_items = sort_items(original_items)
 
-# st.write(f'original_items: {original_items}')
-# st.write(f'sorted_items: {sorted_items}')
-if "data" not in st.session_state:
-    st.session_state.data = 0
-if "modified"  not in st.session_state:
-    st.session_state.modified = 0
-if "actual"  not in st.session_state:
-    st.session_state.actual = 0
+# # st.write(f'original_items: {original_items}')
+# # st.write(f'sorted_items: {sorted_items}')
+# if "data" not in st.session_state:
+#     st.session_state.data = 0
+# if "modified"  not in st.session_state:
+#     st.session_state.modified = 0
+# if "actual"  not in st.session_state:
+#     st.session_state.actual = 0
 
-if "counter" not in st.session_state:
-    st.session_state.counter = 0
+# if "counter" not in st.session_state:
+#     st.session_state.counter = 0
 
-def data_changed():
-    for x in st.session_state.actual:
-        if x not in st.session_state.data:
-            st.session_state.data.append(x)
-    for x in st.session_state.data:
-        if x not in st.session_state.actual:
-            st.session_state.data.remove(x)
+# def data_changed():
+#     for x in st.session_state.actual:
+#         if x not in st.session_state.data:
+#             st.session_state.data.append(x)
+#     for x in st.session_state.data:
+#         if x not in st.session_state.actual:
+#             st.session_state.data.remove(x)
 
-    st.session_state.modified = st.session_state.data 
-
-
-
-values = st.multiselect("Select values", original_items, default= [original_items[0]], key="valores", on_change=data_changed )
-st.session_state.counter += 1
-st.session_state.actual = values 
-
-if st.session_state.actual == [original_items[0]]:
-    st.write("ok")
-    sorted_items = sort_items(st.session_state.actual)
-    st.session_state.data = sorted_items
-else:    
-    listita = []
-    for x in st.session_state.actual:
-        if x not in st.session_state.data:
-            st.session_state.modified.append(x)
-    for x in st.session_state.data:
-        if x not in st.session_state.actual:
-            st.session_state.data.remove(x)
-    sorted_items = sort_items(st.session_state.modified + listita )
-    st.session_state.data = sorted_items
-
-st.write("st.session_state.data", st.session_state.data)
+#     st.session_state.modified = st.session_state.data 
 
 
 
-lista = ["","A", "B", "C", "D", "E", "F"]
-act = st.multiselect("Select values", lista, key="miau", default=None )
-st.write("act", act)
+# values = st.multiselect("Select values", original_items, default= [original_items[0]], key="valores", on_change=data_changed )
+# st.session_state.counter += 1
+# st.session_state.actual = values 
+
+# if st.session_state.actual == [original_items[0]]:
+#     st.write("ok")
+#     sorted_items = sort_items(st.session_state.actual)
+#     st.session_state.data = sorted_items
+# else:    
+#     listita = []
+#     for x in st.session_state.actual:
+#         if x not in st.session_state.data:
+#             st.session_state.modified.append(x)
+#     for x in st.session_state.data:
+#         if x not in st.session_state.actual:
+#             st.session_state.data.remove(x)
+#     sorted_items = sort_items(st.session_state.modified + listita )
+#     st.session_state.data = sorted_items
+
+# st.write("st.session_state.data", st.session_state.data)
+
+
+
+# lista = ["","A", "B", "C", "D", "E", "F"]
+# act = st.multiselect("Select values", lista, key="miau", default=None )
+# st.write("act", act)
 
 
 # st.title("Sorteable elements")
@@ -512,3 +513,10 @@ st.write("act", act)
 
 # st.write(f'original_items: {original_items}')
 # st.write(f'sorted_items: {sorted_items}')
+
+
+
+
+
+#! Crear tablas  con buscador
+# https://github.com/blackary/streamlit-keyup
