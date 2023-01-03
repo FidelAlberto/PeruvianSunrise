@@ -4906,7 +4906,7 @@ if menu_sidebar=="Crear programa":
 
 
         try:
-            def activities_and_transport_program(lugares, index, default_value):
+            def activities_and_transport_program(lugares, index, default_value=None):
                 if 'data_location_act'+index not in st.session_state:
                     st.session_state["data_location_act"+index] = [] #!esto debe de estar asi o generara errores, cuidado!
                 if "lugares_pasado_act"+index not in st.session_state:
@@ -4934,9 +4934,9 @@ if menu_sidebar=="Crear programa":
                 collection = db["activities"]
                 data = collection.find({},{"Name_en":1, "Operator":1,"_id":1, "Location":1})
                 
-                list_activities = [""]
-                ids_activities = [""]
-                transporte = [""]
+                list_activities = ["", "None"]
+                ids_activities = ["", "None"]
+                transporte = ["", "None"]
 
                 for value in data:
                     g = [i for i in value["Location"] if i in lugares]
@@ -5049,7 +5049,7 @@ if menu_sidebar=="Crear programa":
 
                         if st.session_state["actual_sort_act"+index] == [original_items[0]]:
                             
-                            sorted_items = sort_items(st.session_state["actual_sort_act"+index] )
+                            sorted_items = st.session_state["actual_sort_act"+index] 
                             st.session_state["data_sort_act"+index]= sorted_items
                         else:    
                             listita = []
@@ -5224,7 +5224,7 @@ if menu_sidebar=="Crear programa":
                 lugares = lugares[:-3]
                 st.markdown("## DAY 1"+" - "+str(lugares))
                 if st.session_state.contador_act_trans == 1:
-                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), None)
+                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0))
                     st.session_state.data_boom_1 = data_1
                     
                 elif st.session_state.contador_act_trans != 1 :
@@ -5238,7 +5238,7 @@ if menu_sidebar=="Crear programa":
                     lugares = lugares[:-3]
                     st.markdown("## DAY 2"+" - "+str(lugares))
                     if st.session_state.contador_act_trans ==1:
-                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), None)
+                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1))
                         st.session_state.data_boom_2 = data_2
                         
                     elif st.session_state.contador_act_trans != 1:
@@ -5252,7 +5252,7 @@ if menu_sidebar=="Crear programa":
                         lugares = lugares[:-3]
                         st.markdown("## DAY 3"+" - "+str(lugares))
                         if st.session_state.contador_act_trans ==1:
-                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), None)
+                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2))
                             st.session_state.data_boom_3 = data_3
                             
                         elif st.session_state.contador_act_trans != 1:
@@ -5266,7 +5266,7 @@ if menu_sidebar=="Crear programa":
                             lugares = lugares[:-3]
                             st.markdown("## DAY 4"+" - "+str(lugares))
                             if st.session_state.contador_act_trans ==1:
-                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), None)
+                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3))
                                 st.session_state.data_boom_4 = data_4
                                 
                             elif st.session_state.contador_act_trans != 1:
@@ -5280,7 +5280,7 @@ if menu_sidebar=="Crear programa":
                                 lugares = lugares[:-3]
                                 st.markdown("## DAY 5"+" - "+str(lugares))
                                 if st.session_state.contador_act_trans ==1:
-                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), None)
+                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4))
                                     st.session_state.data_boom_5 = data_5
                                 elif st.session_state.contador_act_trans != 1:
                                     data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), st.session_state.data_boom_5)
@@ -5293,7 +5293,7 @@ if menu_sidebar=="Crear programa":
                                     lugares = lugares[:-3]
                                     st.markdown("## DAY 6"+" - "+str(lugares))
                                     if st.session_state.contador_act_trans ==1:
-                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), None)
+                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5))
                                         st.session_state.data_boom_6 = data_6
                                     elif st.session_state.contador_act_trans != 1:
                                         data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), st.session_state.data_boom_6)
@@ -5306,7 +5306,7 @@ if menu_sidebar=="Crear programa":
                                         lugares = lugares[:-3]
                                         st.markdown("## DAY 7"+" - "+str(lugares))
                                         if st.session_state.contador_act_trans ==1:
-                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), None)
+                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6))
                                             st.session_state.data_boom_7 = data_7
                                         elif st.session_state.contador_act_trans != 1:
                                             data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), st.session_state.data_boom_7)
@@ -5319,7 +5319,7 @@ if menu_sidebar=="Crear programa":
                                             lugares = lugares[:-3]
                                             st.markdown("## DAY 8"+" - "+str(lugares))
                                             if st.session_state.contador_act_trans ==1:
-                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), None)
+                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7))
                                                 st.session_state.data_boom_8 = data_8
                                             elif st.session_state.contador_act_trans != 1:
                                                 data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), st.session_state.data_boom_8)
@@ -5332,7 +5332,7 @@ if menu_sidebar=="Crear programa":
                                                 lugares = lugares[:-3]
                                                 st.markdown("## DAY 9"+" - "+str(lugares))
                                                 if st.session_state.contador_act_trans ==1:
-                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), None)
+                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8))
                                                     st.session_state.data_boom_9 = data_9
                                                 elif st.session_state.contador_act_trans != 1:
                                                     data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), st.session_state.data_boom_9)
@@ -5345,7 +5345,7 @@ if menu_sidebar=="Crear programa":
                                                     lugares = lugares[:-3]
                                                     st.markdown("## DAY 10"+" - "+str(lugares))
                                                     if st.session_state.contador_act_trans ==1:
-                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), None)
+                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9))
                                                         st.session_state.data_boom_10 = data_10
                                                     elif st.session_state.contador_act_trans != 1:
                                                         data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), st.session_state.data_boom_10)
@@ -5358,7 +5358,7 @@ if menu_sidebar=="Crear programa":
                                                         lugares = lugares[:-3]
                                                         st.markdown("## DAY 11"+" - "+str(lugares))
                                                         if st.session_state.contador_act_trans ==1:
-                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), None)
+                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10))
                                                             st.session_state.data_boom_11 = data_11
                                                         elif st.session_state.contador_act_trans != 1:
                                                             data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), st.session_state.data_boom_11)
@@ -5371,7 +5371,7 @@ if menu_sidebar=="Crear programa":
                                                             lugares = lugares[:-3]
                                                             st.markdown("## DAY 12"+" - "+str(lugares))
                                                             if st.session_state.contador_act_trans ==1:
-                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), None)
+                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11))
                                                                 st.session_state.data_boom_12 = data_12
                                                             elif st.session_state.contador_act_trans != 1:
                                                                 data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), st.session_state.data_boom_12)
@@ -5384,7 +5384,7 @@ if menu_sidebar=="Crear programa":
                                                                 lugares = lugares[:-3]
                                                                 st.markdown("## DAY 13"+" - "+str(lugares))
                                                                 if st.session_state.contador_act_trans ==1:
-                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), None)
+                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12))
                                                                     st.session_state.data_boom_13 = data_13
                                                                 elif st.session_state.contador_act_trans != 1:
                                                                     data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), st.session_state.data_boom_13)
@@ -5397,7 +5397,7 @@ if menu_sidebar=="Crear programa":
                                                                     lugares = lugares[:-3]
                                                                     st.markdown("## DAY 14"+" - "+str(lugares))
                                                                     if st.session_state.contador_act_trans ==1:
-                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), None)
+                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13))
                                                                         st.session_state.data_boom_14 = data_14
                                                                     elif st.session_state.contador_act_trans != 1:
                                                                         data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), st.session_state.data_boom_14)
