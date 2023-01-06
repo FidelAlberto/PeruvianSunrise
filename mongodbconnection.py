@@ -38,7 +38,7 @@ from time import sleep
 # st.title("MongoDB Connection")
 # Conexion con Mongodb Atlas in PC windows and  in cloud streamlit
 
-cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
+# cluster = pymongo.MongoClient("mongodb+srv://test:Empresas731@cluster0.vzqjn.mongodb.net/peruviansunrise?retryWrites=true&w=majority")
 
 cluster = pymongo.MongoClient("mongodb://localhost:27017/")
 
@@ -55,6 +55,7 @@ for  location in data:
     "Name_en": location, # ingles
     "Name_de": location, # aleman
     "Name_es": location, # español
+    "Country": "Peru",
     "Description_en": "",
     "Description_de": "",
     "Description_es": "",

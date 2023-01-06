@@ -62,7 +62,7 @@ def get_link(bucket_name, object_name, expiration=3600):
 # st.image(url, width=200)
 
 #################################################### 
- 
+
 import time
 # to create and upload a file to S3 bucket
 def uploadimageToS3(file, bucket, s3_file):
@@ -79,7 +79,7 @@ def uploadimageToS3(file, bucket, s3_file):
     except FileNotFoundError:
         time.sleep(9)
         st.error('File not found.')
-        return False     
+        return False    
 
 # c1, c2 = st.columns(2)
 # c1.subheader("Upload a PNG File")

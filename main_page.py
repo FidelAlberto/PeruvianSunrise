@@ -83,14 +83,21 @@ from PIL import Image
 import requests
 from io import BytesIO
 import base64
+#? Para imagenes que se estan guardadas en aws como links
 def resize_image(image, width=600, height=400):
     url = image
     r = requests.get(url)
     pilImage = Image.open(BytesIO(r.content))
-    pilImage = pilImage.resize((width,height), Image.ANTIALIAS)
+    pilImage = pilImage.resize((width, height), Image.Resampling.LANCZOS)
     
     return pilImage
     
+#? Para imagenes que se suben  con st.file_uploader
+def resize_image_uploaded(image, width=600, height=400):
+    pilImage = Image.open(image)
+    pilImage = pilImage.resize((width, height), Image.Resampling.LANCZOS)
+    
+    return pilImage
 # Fin
 
 
@@ -1156,7 +1163,11 @@ if menu_sidebar == "Data":
             complete_data = collection.find_one({"_id":code})
             
             
-            st.subheader("Edit the activity")
+            st.subheader("Edit an activity")
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            numero = paises.index(complete_data["Country"])
+            country = st.selectbox("Country",paises, key="country", index=numero)
+            
             title = st.text_input("Title in English",complete_data["Name_en"])
             title_de = st.text_input("Title in German",complete_data["Name_de"])
             title_es = st.text_input("Title in Spanish", complete_data["Name_es"])
@@ -1198,11 +1209,13 @@ if menu_sidebar == "Data":
             #     response = requests.get(url_2)
             # if url_3 is not None:
             #     response = requests.get(url_3)
-            
+            url_1a = url_1
+            url_2a = url_2
+            url_3a = url_3            
 
-            c1.image(resize_image(url_1))
-            c2.image(resize_image(url_2))
-            c3.image(resize_image(url_3))
+            c1.image(resize_image(url_1a))
+            c2.image(resize_image(url_2a))
+            c3.image(resize_image(url_3a))
             
 
             with st.container():
@@ -1389,6 +1402,7 @@ if menu_sidebar == "Data":
                             # Price_adult is [[people],[price]]
                             
                             record = {
+                            "Country": country,
                             "Name_en": title, # ingles
                             "Name_de": title_de, # aleman
                             "Name_es": title_es, # español
@@ -1461,6 +1475,7 @@ if menu_sidebar == "Data":
                             # Price_adult is [[people],[price]]
                             
                             record = {
+                            "Country": country,
                             "Name_en": title, # ingles
                             "Name_de": title_de, # aleman
                             "Name_es": title_es, # español
@@ -1494,6 +1509,8 @@ if menu_sidebar == "Data":
         if activities_option == "Create new":
             
             st.subheader("Create a new activity")
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            country = st.selectbox("Country",paises, key="country", index=173)
             title = st.text_input("Title in English")
             title_de = st.text_input("Title in German")
             title_es = st.text_input("Title in Spanish")
@@ -1635,6 +1652,7 @@ if menu_sidebar == "Data":
                             # Price_adult is [[people],[price]]
                             
                             record = {
+                            "Country": country,
                             "Name_en": title, # ingles
                             "Name_de": title_de, # aleman
                             "Name_es": title_es, # español
@@ -1854,8 +1872,11 @@ if menu_sidebar == "Data":
         collection = db["locations"]
         # fin
         activities_option = st.sidebar.radio("Option",["Create new","Edit","Delete"])
+        paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
         if activities_option=="Create new":
             st.subheader("Create new location")
+            
+            country = st.selectbox("Country",paises, key="country", index=173)
             name_en = st.text_input("Name in english")
             name_de = st.text_input("Name in german")
             name_es = st.text_input("Name in spanish")
@@ -1866,14 +1887,17 @@ if menu_sidebar == "Data":
             uploaded_file = st.file_uploader("")
         
             if uploaded_file!=None:
-                st.image(uploaded_file, width = 500 ,output_format="PNG")
+                st.image(uploaded_file ,output_format="PNG")
                 
                 if st.button("Save"):
                     # reemplazar los espacios por guiones bajos
                     title_separate = name_en.replace(" ", "_")
                     
                     with st.spinner('Uploading...'):
-                        
+                        name_en = name_en +" ("+country+")"
+                        name_de = name_de +" ("+country+")"
+                        name_es = name_es +" ("+country+")"
+
                         image_1 = title_separate+".png"
                         
                         # here is important to (put  the data itself, bucket_name, and the name that you want to save in s3)
@@ -1889,6 +1913,7 @@ if menu_sidebar == "Data":
                         "Name_en": name_en, # ingles
                         "Name_de": name_de, # aleman
                         "Name_es": name_es, # español
+                        "Country": country,
                         "Description_en": description_en,
                         "Description_de": description_de,
                         "Description_es": description_es,
@@ -1917,6 +1942,8 @@ if menu_sidebar == "Data":
             
             
             st.subheader("Edit location")
+
+            country =  complete_data["Country"]
             name_en = st.text_input("Name in english", complete_data["Name_en"])
             name_de = st.text_input("Name in german", complete_data["Name_de"])
             name_es = st.text_input("Name in spanish", complete_data["Name_es"])
@@ -1924,13 +1951,13 @@ if menu_sidebar == "Data":
             description_de = st.text_area("Description in german", complete_data["Description_de"])
             description_es = st.text_area("Description in spanish", complete_data["Description_es"])
             st.subheader("Image")
-            st.image(get_link(bucket_name, complete_data["Images"]), width=500 )
+            st.image(get_link(bucket_name, complete_data["Images"]))
             
             uploaded_file = st.file_uploader("Upload new image")
         
             if uploaded_file!=None:
                 st.subheader("New image")
-                st.image(uploaded_file, width = 500 ,output_format="PNG")
+                st.image(uploaded_file,output_format="PNG")
             
             if st.button("Save"):
                 # reemplazar los espacios por guiones bajos
@@ -1949,6 +1976,7 @@ if menu_sidebar == "Data":
                         "Name_en": name_en, # ingles
                         "Name_de": name_de, # aleman
                         "Name_es": name_es, # español
+                        "Country": country,
                         "Description_en": description_en,
                         "Description_de": description_de,
                         "Description_es": description_es,
@@ -1973,6 +2001,7 @@ if menu_sidebar == "Data":
                         "Name_en": name_en, # ingles
                         "Name_de": name_de, # aleman
                         "Name_es": name_es, # español
+                        "Country": country,
                         "Description_en": description_en,
                         "Description_de": description_de,
                         "Description_es": description_es,
@@ -1994,7 +2023,7 @@ if menu_sidebar == "Data":
         # Delete a location
         ########################
         if activities_option == "Delete":
-            st.subheader("Delete a activity")
+            st.subheader("Delete an activity")
             # Pedir datos de mongo db para  obtener los nombres de las actividades
             collection = db["locations"]
             data = collection.find({},{"Name_en":1, "_id":1})
@@ -2059,8 +2088,20 @@ if menu_sidebar == "Data":
         # fin
         opciones = st.sidebar.radio("Option",["Create new","Edit","Delete"], key="transportation")
         if opciones == "Create new":
-            st.subheader("Create new transport")
+            st.subheader("Create a new transport")
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            country = st.selectbox("Country",paises, key="country", index=173)
             name_en = st.text_input("Name in english", key="trans_en")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+            # fin
+            general_locations = st.multiselect("General locations",list_activities) 
+
             # You can call any Streamlit command, including custom components:
             if "option1a" not in st.session_state:
                 st.session_state["option1a"] = ""
@@ -2628,7 +2669,9 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Country": country,
                     "Name_en": name_en,
+                    "locations" : general_locations,
                     "route1": [st.session_state["option"+str(data_final[0])+"a"],st.session_state["option"+str(data_final[0])+"b"], st.session_state["descrip_"+str(data_final[0])+"_en"],st.session_state["descrip_"+str(data_final[0])+"_de"] , st.session_state["descrip_"+str(data_final[0])+"_es"]], 
                     "route2": [st.session_state["option"+str(data_final[1])+"a"],st.session_state["option"+str(data_final[1])+"b"], st.session_state["descrip_"+str(data_final[1])+"_en"],st.session_state["descrip_"+str(data_final[1])+"_de"] , st.session_state["descrip_"+str(data_final[1])+"_es"]], 
                     "route3": [st.session_state["option"+str(data_final[2])+"a"],st.session_state["option"+str(data_final[2])+"b"], st.session_state["descrip_"+str(data_final[2])+"_en"],st.session_state["descrip_"+str(data_final[2])+"_de"] , st.session_state["descrip_"+str(data_final[2])+"_es"]], 
@@ -2722,6 +2765,7 @@ if menu_sidebar == "Data":
         # opcion de editar transportation 
         #####################
         if opciones == "Edit":
+            
             st.subheader("Edit a transport")
             # Pedir datos de mongo db para  obtener los nombres de las actividades
             collection = db["transport"]
@@ -2740,7 +2784,20 @@ if menu_sidebar == "Data":
             code = ids_activities[order_activity]
             complete_data = collection.find_one({"_id":code})
             
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            numero = paises.index(complete_data["Country"]) 
+            country = st.selectbox("Country",paises, key="trans_edit", index=numero)
+
             name_en = st.text_input("Name in english",complete_data["Name_en"] , key="trans_en")
+            # Pedir datos de mongo db para  obtener los nombres de las actividades
+            collection_location = db["locations"]
+            data = collection_location.find({},{"Name_en":1})
+            
+            list_activities = []
+            for value in data:
+                list_activities.append(value["Name_en"])
+            # fin
+            general_locations = st.multiselect("General locations",list_activities, default=complete_data["locations"])
             
             # You can call any Streamlit command, including custom components:
             # You can call any Streamlit command, including custom components:
@@ -3385,7 +3442,9 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Country": country,
                     "Name_en": name_en,
+                    "locations": general_locations,
                     "route1": [st.session_state["option"+str(data_final[0])+"a"],st.session_state["option"+str(data_final[0])+"b"], st.session_state["descrip_"+str(data_final[0])+"_en"],st.session_state["descrip_"+str(data_final[0])+"_de"] , st.session_state["descrip_"+str(data_final[0])+"_es"]], 
                     "route2": [st.session_state["option"+str(data_final[1])+"a"],st.session_state["option"+str(data_final[1])+"b"], st.session_state["descrip_"+str(data_final[1])+"_en"],st.session_state["descrip_"+str(data_final[1])+"_de"] , st.session_state["descrip_"+str(data_final[1])+"_es"]], 
                     "route3": [st.session_state["option"+str(data_final[2])+"a"],st.session_state["option"+str(data_final[2])+"b"], st.session_state["descrip_"+str(data_final[2])+"_en"],st.session_state["descrip_"+str(data_final[2])+"_de"] , st.session_state["descrip_"+str(data_final[2])+"_es"]], 
@@ -3409,7 +3468,8 @@ if menu_sidebar == "Data":
                     "notes price":notes_precio
                     }
                     
-                    collection.insert_one(record)
+                    # collection.insert_one(record)
+                    collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
                     # poner las variables en su estado inicial
                     st.session_state["option1a"] = ""
                     st.session_state["option2a"] = ""
@@ -3573,6 +3633,8 @@ if menu_sidebar == "Data":
                 for value in data:
                     list_activities.append(value["Name_en"])
                 # fin
+                paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+                country = st.selectbox("Country",paises, key="country34", index=173)
                 lugares = st.multiselect("Choose the location",list_activities)
                 lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
                 calidad = st.selectbox("Choose the hotel rating",lista)
@@ -3593,6 +3655,7 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Country": country,
                     "Name_en": name_en,
                     "Name_de": name_de,
                     "Name_es": name_es,
@@ -3690,6 +3753,9 @@ if menu_sidebar == "Data":
                 for value in data:
                     list_activities.append(value["Name_en"])
                 # fin
+                paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+                numero = paises.index(complete_data["Country"])
+                country = st.selectbox("Country",paises, key="country3455", index=numero)
                 lugares = st.multiselect("Choose the location",list_activities, default=complete_data["location"])
                 lista = ["1 ★", "2 ★★", "3 ★★★", "4 ★★★★", "5 ★★★★★"]
                 calidad = st.selectbox("Choose the hotel rating",lista, index=complete_data["rating"])
@@ -3835,7 +3901,9 @@ if menu_sidebar == "Data":
         if activities_option == "Create new":
             
             st.subheader("Create a new bundle")
-            
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            a,b=st.columns((1,3))
+            country = a.selectbox("Country",paises, key="country_bundle", index=173)
             name_en = st.text_input("Name in English")
             name_de = st.text_input("Name in German")
             name_es = st.text_input("Name in Spanish")
@@ -3878,61 +3946,65 @@ if menu_sidebar == "Data":
             
             # Pedir datos de mongo db para  obtener los nombres de los transportes
             collection = db["transport"]
-            data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
+            data = collection.find({},{"Name_en":1,"locations":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
             for value in data:
-                
-                g1 = [i for i in value["route1"] if i in lugares]
-                g2 = [i for i in value["route2"] if i in lugares]
-                g3 = [i for i in value["route3"] if i in lugares]
-                g4 = [i for i in value["route4"] if i in lugares]
-                g5 = [i for i in value["route5"] if i in lugares]
-                g6 = [i for i in value["route6"] if i in lugares]
-                g7 = [i for i in value["route7"] if i in lugares]
-                g8 = [i for i in value["route8"] if i in lugares]
-                g9 = [i for i in value["route9"] if i in lugares]
-                g10 = [i for i in value["route10"] if i in lugares]
-                final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
-                if len(final)>0:
-                    list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
-                    transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
-                    ids_activities.append(value["_id"])
-                    if len(final)>=2:
-                        list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
-                        transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
-                        ids_activities.append(value["_id"])
-                        if len(final)>=3:
-                            list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
-                            transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
+                for x in value["locations"]:
+                    if x in lugares:
+
+                        g1 = [i for i in [value["route1"][0]] if i != ""]
+                        g2 = [i for i in [value["route2"][0]] if i != ""]
+                        g3 = [i for i in [value["route3"][0]] if i != ""]
+                        g4 = [i for i in [value["route4"][0]] if i != ""]
+                        g5 = [i for i in [value["route5"][0]] if i != ""]
+                        g6 = [i for i in [value["route6"][0]] if i != ""]
+                        g7 = [i for i in [value["route7"][0]] if i != ""]
+                        g8 = [i for i in [value["route8"][0]] if i != ""]
+                        g9 = [i for i in [value["route9"][0]] if i != ""]
+                        g10 = [i for i in [value["route10"][0]] if i != ""]
+                        final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
+                        
+                        if len(final)>0:
+                            list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
+                            transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
                             ids_activities.append(value["_id"])
-                            if len(final)>=4:
-                                list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
-                                transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
+                            if len(final)>=2:
+                                list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
+                                transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
                                 ids_activities.append(value["_id"])
-                                if len(final)>=5:
-                                    list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
-                                    transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
+                                if len(final)>=3:
+                                    list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
+                                    transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
                                     ids_activities.append(value["_id"])
-                                    if len(final)>=6:
-                                        list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
-                                        transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
+                                    if len(final)>=4:
+                                        list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
+                                        transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
                                         ids_activities.append(value["_id"])
-                                        if len(final)>=7:
-                                            list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
-                                            transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
+                                        if len(final)>=5:
+                                            list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
+                                            transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
                                             ids_activities.append(value["_id"])
-                                            if len(final)>=8:
-                                                list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
-                                                transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
+                                            if len(final)>=6:
+                                                list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
+                                                transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
                                                 ids_activities.append(value["_id"])
-                                                if len(final)>=9:
-                                                    list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
-                                                    transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                if len(final)>=7:
+                                                    list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
+                                                    transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
                                                     ids_activities.append(value["_id"])
-                                                    if len(final)>=10:
-                                                        list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
-                                                        transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                    if len(final)>=8:
+                                                        list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
+                                                        transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
                                                         ids_activities.append(value["_id"])
-        
+                                                        if len(final)>=9:
+                                                            list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
+                                                            transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                            ids_activities.append(value["_id"])
+                                                            if len(final)>=10:
+                                                                list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
+                                                                transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                                ids_activities.append(value["_id"])
+                        break
+
             #! Nueva forma de hacer
             
             #! Fin
@@ -3979,10 +4051,10 @@ if menu_sidebar == "Data":
                     st.session_state.counter += 1
                     st.session_state.actual_sort = values 
 
-                    if st.session_state.actual_sort == [original_items[0]]:
-                        st.write("ok")
-                        sorted_items = sort_items(st.session_state.actual_sort)
-                        st.session_state.data_sort = sorted_items
+                    if st.session_state["actual_sort"] == [original_items[0]]:
+                        
+                        sorted_items = st.session_state["actual_sort"] 
+                        st.session_state["data_sort"]= sorted_items
                     else:    
                         listita = []
                         for x in st.session_state.actual_sort:
@@ -4062,6 +4134,7 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Country": country,
                     "Name_en": name_en,
                     "Name_de": name_de,
                     "Name_es": name_es,
@@ -4081,6 +4154,14 @@ if menu_sidebar == "Data":
                     
                     collection.insert_one(record)
                     
+                    # poner las cosas en su estado inicial
+                    st.session_state.data_location = []
+                    st.session_state.lugares_pasado = [""]
+                    st.session_state.data_sort = []
+                    st.session_state.modified_sort = []
+                    st.session_state.actual_sort = []
+                    st.session_state.counter = 0
+
                 st.success('Upload successful!')
 
 
@@ -4130,8 +4211,11 @@ if menu_sidebar == "Data":
             code = ids_activities[order_activity]
             complete_data = collection.find_one({"_id":code})
             
-            st.subheader("Create a new bundle")
-            
+            st.subheader("Edit a bundle")
+            paises = ['Afghanistan', 'Aland Islands', 'Albania', 'Algeria', 'American Samoa', 'Andorra', 'Angola', 'Anguilla', 'Antarctica', 'Antigua and Barbuda', 'Argentina', 'Armenia', 'Aruba', 'Australia', 'Austria', 'Azerbaijan', 'Bahamas', 'Bahrain', 'Bangladesh', 'Barbados', 'Belarus', 'Belgium', 'Belize', 'Benin', 'Bermuda', 'Bhutan', 'Bolivia, Plurinational State of', 'Bonaire, Sint Eustatius and Saba', 'Bosnia and Herzegovina', 'Botswana', 'Bouvet Island', 'Brazil', 'British Indian Ocean Territory', 'Brunei Darussalam', 'Bulgaria', 'Burkina Faso', 'Burundi', 'Cambodia', 'Cameroon', 'Canada', 'Cape Verde', 'Cayman Islands', 'Central African Republic', 'Chad', 'Chile', 'China', 'Christmas Island', 'Cocos (Keeling) Islands', 'Colombia', 'Comoros', 'Congo', 'Congo, The Democratic Republic of the', 'Cook Islands', 'Costa Rica', "Côte d'Ivoire", 'Croatia', 'Cuba', 'Curaçao', 'Cyprus', 'Czech Republic', 'Denmark', 'Djibouti', 'Dominica', 'Dominican Republic', 'Ecuador', 'Egypt', 'El Salvador', 'Equatorial Guinea', 'Eritrea', 'Estonia', 'Ethiopia', 'Falkland Islands (Malvinas)', 'Faroe Islands', 'Fiji', 'Finland', 'France', 'French Guiana', 'French Polynesia', 'French Southern Territories', 'Gabon', 'Gambia', 'Georgia', 'Germany', 'Ghana', 'Gibraltar', 'Greece', 'Greenland', 'Grenada', 'Guadeloupe', 'Guam', 'Guatemala', 'Guernsey', 'Guinea', 'Guinea-Bissau', 'Guyana', 'Haiti', 'Heard Island and McDonald Islands', 'Holy See (Vatican City State)', 'Honduras', 'Hong Kong', 'Hungary', 'Iceland', 'India', 'Indonesia', 'Iran, Islamic Republic of', 'Iraq', 'Ireland', 'Isle of Man', 'Israel', 'Italy', 'Jamaica', 'Japan', 'Jersey', 'Jordan', 'Kazakhstan', 'Kenya', 'Kiribati', "Korea, Democratic People's Republic of", 'Korea, Republic of', 'Kuwait', 'Kyrgyzstan', "Lao People's Democratic Republic", 'Latvia', 'Lebanon', 'Lesotho', 'Liberia', 'Libya', 'Liechtenstein', 'Lithuania', 'Luxembourg', 'Macao', 'Macedonia, Republic of', 'Madagascar', 'Malawi', 'Malaysia', 'Maldives', 'Mali', 'Malta', 'Marshall Islands', 'Martinique', 'Mauritania', 'Mauritius', 'Mayotte', 'Mexico', 'Micronesia, Federated States of', 'Moldova, Republic of', 'Monaco', 'Mongolia', 'Montenegro', 'Montserrat', 'Morocco', 'Mozambique', 'Myanmar', 'Namibia', 'Nauru', 'Nepal', 'Netherlands', 'New Caledonia', 'New Zealand', 'Nicaragua', 'Niger', 'Nigeria', 'Niue', 'Norfolk Island', 'Northern Mariana Islands', 'Norway', 'Oman', 'Pakistan', 'Palau', 'Palestinian Territory, Occupied', 'Panama', 'Papua New Guinea', 'Paraguay', 'Peru', 'Philippines', 'Pitcairn', 'Poland', 'Portugal', 'Puerto Rico', 'Qatar', 'Réunion', 'Romania', 'Russian Federation', 'Rwanda', 'Saint Barthélemy', 'Saint Helena, Ascension and Tristan da Cunha', 'Saint Kitts and Nevis', 'Saint Lucia', 'Saint Martin (French part)', 'Saint Pierre and Miquelon', 'Saint Vincent and the Grenadines', 'Samoa', 'San Marino', 'Sao Tome and Principe', 'Saudi Arabia', 'Senegal', 'Serbia', 'Seychelles', 'Sierra Leone', 'Singapore', 'Sint Maarten (Dutch part)', 'Slovakia', 'Slovenia', 'Solomon Islands', 'Somalia', 'South Africa', 'South Georgia and the South Sandwich Islands', 'Spain', 'Sri Lanka', 'Sudan', 'Suriname', 'South Sudan', 'Svalbard and Jan Mayen', 'Swaziland', 'Sweden', 'Switzerland', 'Syrian Arab Republic', 'Taiwan, Province of China', 'Tajikistan', 'Tanzania, United Republic of', 'Thailand', 'Timor-Leste', 'Togo', 'Tokelau', 'Tonga', 'Trinidad and Tobago', 'Tunisia', 'Turkey', 'Turkmenistan', 'Turks and Caicos Islands', 'Tuvalu', 'Uganda', 'Ukraine', 'United Arab Emirates', 'United Kingdom', 'United States', 'United States Minor Outlying Islands', 'Uruguay', 'Uzbekistan', 'Vanuatu', 'Venezuela, Bolivarian Republic of', 'Viet Nam', 'Virgin Islands, British', 'Virgin Islands, U.S.', 'Wallis and Futuna', 'Yemen', 'Zambia', 'Zimbabwe']
+            a,b=st.columns((1,3))
+            numero = paises.index(complete_data["Country"])
+            country = a.selectbox("Country",paises, key="country_bundlef323", index=numero)
             name_en = st.text_input("Name in English", value=complete_data["Name_en"])
             name_de = st.text_input("Name in German", value=complete_data["Name_de"])
             name_es = st.text_input("Name in Spanish", value=complete_data["Name_es"])
@@ -4174,61 +4258,64 @@ if menu_sidebar == "Data":
             
             # Pedir datos de mongo db para  obtener los nombres de los transportes
             collection = db["transport"]
-            data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
+            data = collection.find({},{"Name_en":1,"locations":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
             for value in data:
-                
-                g1 = [i for i in value["route1"] if i in lugares]
-                g2 = [i for i in value["route2"] if i in lugares]
-                g3 = [i for i in value["route3"] if i in lugares]
-                g4 = [i for i in value["route4"] if i in lugares]
-                g5 = [i for i in value["route5"] if i in lugares]
-                g6 = [i for i in value["route6"] if i in lugares]
-                g7 = [i for i in value["route7"] if i in lugares]
-                g8 = [i for i in value["route8"] if i in lugares]
-                g9 = [i for i in value["route9"] if i in lugares]
-                g10 = [i for i in value["route10"] if i in lugares]
-                final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
-                if len(final)>0:
-                    list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
-                    transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
-                    ids_activities.append(value["_id"])
-                    if len(final)>=2:
-                        list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
-                        transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
-                        ids_activities.append(value["_id"])
-                        if len(final)>=3:
-                            list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
-                            transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
+                for x in value["locations"]:
+                    if x in lugares:
+
+                        g1 = [i for i in [value["route1"][0]] if i != ""]
+                        g2 = [i for i in [value["route2"][0]] if i != ""]
+                        g3 = [i for i in [value["route3"][0]] if i != ""]
+                        g4 = [i for i in [value["route4"][0]] if i != ""]
+                        g5 = [i for i in [value["route5"][0]] if i != ""]
+                        g6 = [i for i in [value["route6"][0]] if i != ""]
+                        g7 = [i for i in [value["route7"][0]] if i != ""]
+                        g8 = [i for i in [value["route8"][0]] if i != ""]
+                        g9 = [i for i in [value["route9"][0]] if i != ""]
+                        g10 = [i for i in [value["route10"][0]] if i != ""]
+                        final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
+                        
+                        if len(final)>0:
+                            list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
+                            transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
                             ids_activities.append(value["_id"])
-                            if len(final)>=4:
-                                list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
-                                transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
+                            if len(final)>=2:
+                                list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
+                                transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
                                 ids_activities.append(value["_id"])
-                                if len(final)>=5:
-                                    list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
-                                    transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
+                                if len(final)>=3:
+                                    list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
+                                    transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
                                     ids_activities.append(value["_id"])
-                                    if len(final)>=6:
-                                        list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
-                                        transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
+                                    if len(final)>=4:
+                                        list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
+                                        transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
                                         ids_activities.append(value["_id"])
-                                        if len(final)>=7:
-                                            list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
-                                            transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
+                                        if len(final)>=5:
+                                            list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
+                                            transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
                                             ids_activities.append(value["_id"])
-                                            if len(final)>=8:
-                                                list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
-                                                transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
+                                            if len(final)>=6:
+                                                list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
+                                                transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
                                                 ids_activities.append(value["_id"])
-                                                if len(final)>=9:
-                                                    list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
-                                                    transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                if len(final)>=7:
+                                                    list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
+                                                    transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
                                                     ids_activities.append(value["_id"])
-                                                    if len(final)>=10:
-                                                        list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
-                                                        transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                    if len(final)>=8:
+                                                        list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
+                                                        transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
                                                         ids_activities.append(value["_id"])
-        
+                                                        if len(final)>=9:
+                                                            list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
+                                                            transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                            ids_activities.append(value["_id"])
+                                                            if len(final)>=10:
+                                                                list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
+                                                                transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                                ids_activities.append(value["_id"])
+                        break
             #! Nueva forma de hacer
             
             #! Fin
@@ -4277,7 +4364,7 @@ if menu_sidebar == "Data":
                     st.session_state.actual_sort2 = values 
 
                     if st.session_state.actual_sort2 == [original_items[0]]:
-                        st.write("ok")
+                        
                         sorted_items = sort_items(st.session_state.actual_sort2)
                         st.session_state.data_sort2 = sorted_items
                     else:    
@@ -4358,6 +4445,7 @@ if menu_sidebar == "Data":
                     # para cada route o ruta we put  the data in the following order : [lugar de salida, lugar de llegada, descripcion ingles, descripcion aleman, descripcion espanol]
                     
                     record = {
+                    "Country": country,
                     "Name_en": name_en,
                     "Name_de": name_de,
                     "Name_es": name_es,
@@ -4377,7 +4465,14 @@ if menu_sidebar == "Data":
                     
                     
                     collection.update_one({"_id": complete_data["_id"]}, {"$set": record})
-                    
+                    # Resetear los datos
+                    st.session_state.data_location_2 = []
+                    st.session_state.lugares_pasado_2 = [""]
+                    st.session_state.data_sort2 = []
+                    st.session_state.modified_sort2 = []
+                    st.session_state.actual_sort2 = []
+                    st.session_state.counter2 = 0
+
                 st.success('Upload successful!')
 
 
@@ -4481,6 +4576,9 @@ if menu_sidebar=="Crear programa":
             st.session_state.nights_data_base_program = [["Lima (Peru)", 0]]
         if "days_data_base_program" not in st.session_state:
             st.session_state.days_places_base_program = ""
+        if "comida" not in st.session_state:
+                st.session_state.comida = 0
+        st.session_state.comida = 0
 
 
         # https://extras.streamlit.app/Color%20ya%20Headers
@@ -4934,9 +5032,9 @@ if menu_sidebar=="Crear programa":
                 collection = db["activities"]
                 data = collection.find({},{"Name_en":1, "Operator":1,"_id":1, "Location":1})
                 
-                list_activities = ["", "None"]
-                ids_activities = ["", "None"]
-                transporte = ["", "None"]
+                list_activities = [""]
+                ids_activities = [""]
+                transporte = [""]
 
                 for value in data:
                     g = [i for i in value["Location"] if i in lugares]
@@ -4947,61 +5045,63 @@ if menu_sidebar=="Crear programa":
                 
                 # Pedir datos de mongo db para  obtener los nombres de los transportes
                 collection = db["transport"]
-                data = collection.find({},{"Name_en":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
+                data = collection.find({},{"Name_en":1,"locations":1, "operator":1,"_id":1, "route1":1, "route2":1, "route3":1, "route4":1, "route5":1, "route6":1, "route7":1, "route8":1, "route9":1, "route10":1})
                 for value in data:
-                    
-                    g1 = [i for i in value["route1"] if i in lugares]
-                    g2 = [i for i in value["route2"] if i in lugares]
-                    g3 = [i for i in value["route3"] if i in lugares]
-                    g4 = [i for i in value["route4"] if i in lugares]
-                    g5 = [i for i in value["route5"] if i in lugares]
-                    g6 = [i for i in value["route6"] if i in lugares]
-                    g7 = [i for i in value["route7"] if i in lugares]
-                    g8 = [i for i in value["route8"] if i in lugares]
-                    g9 = [i for i in value["route9"] if i in lugares]
-                    g10 = [i for i in value["route10"] if i in lugares]
-                    final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
-                    if len(final)>0:
-                        list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
-                        transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
-                        ids_activities.append(value["_id"])
-                        if len(final)>=2:
-                            list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
-                            transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
-                            ids_activities.append(value["_id"])
-                            if len(final)>=3:
-                                list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
-                                transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
+                    for x in value["locations"]:
+                        if x in lugares:
+
+                            g1 = [i for i in [value["route1"][0]] if i != ""]
+                            g2 = [i for i in [value["route2"][0]] if i != ""]
+                            g3 = [i for i in [value["route3"][0]] if i != ""]
+                            g4 = [i for i in [value["route4"][0]] if i != ""]
+                            g5 = [i for i in [value["route5"][0]] if i != ""]
+                            g6 = [i for i in [value["route6"][0]] if i != ""]
+                            g7 = [i for i in [value["route7"][0]] if i != ""]
+                            g8 = [i for i in [value["route8"][0]] if i != ""]
+                            g9 = [i for i in [value["route9"][0]] if i != ""]
+                            g10 = [i for i in [value["route10"][0]] if i != ""]
+                            final = g1 + g2 + g3 + g4 + g5 + g6 + g7 + g8 + g9 + g10
+                            if len(final)>0:
+                                list_activities.append(value["route1"][0]+" --> "+value["route1"][1]+" (" + value["operator"]+ ")") 
+                                transporte.append(value["route1"][0]+" to "+value["route1"][1]) 
                                 ids_activities.append(value["_id"])
-                                if len(final)>=4:
-                                    list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
-                                    transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
+                                if len(final)>=2:
+                                    list_activities.append(value["route2"][0]+" --> "+value["route2"][1]+" (" + value["operator"]+ ")") 
+                                    transporte.append(value["route2"][0]+" to "+value["route2"][1]) 
                                     ids_activities.append(value["_id"])
-                                    if len(final)>=5:
-                                        list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
-                                        transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
+                                    if len(final)>=3:
+                                        list_activities.append(value["route3"][0]+" --> "+value["route3"][1]+" (" + value["operator"]+ ")") 
+                                        transporte.append(value["route3"][0]+" to "+value["route3"][1]) 
                                         ids_activities.append(value["_id"])
-                                        if len(final)>=6:
-                                            list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
-                                            transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
+                                        if len(final)>=4:
+                                            list_activities.append(value["route4"][0]+" --> "+value["route4"][1]+" (" + value["operator"]+ ")") 
+                                            transporte.append(value["route4"][0]+" to "+value["route4"][1]) 
                                             ids_activities.append(value["_id"])
-                                            if len(final)>=7:
-                                                list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
-                                                transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
+                                            if len(final)>=5:
+                                                list_activities.append(value["route5"][0]+" --> "+value["route5"][1]+" (" + value["operator"]+ ")") 
+                                                transporte.append(value["route5"][0]+" to "+value["route5"][1]) 
                                                 ids_activities.append(value["_id"])
-                                                if len(final)>=8:
-                                                    list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
-                                                    transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
+                                                if len(final)>=6:
+                                                    list_activities.append(value["route6"][0]+" --> "+value["route6"][1]+" (" + value["operator"]+ ")") 
+                                                    transporte.append(value["route6"][0]+" to "+value["route6"][1]) 
                                                     ids_activities.append(value["_id"])
-                                                    if len(final)>=9:
-                                                        list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
-                                                        transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                    if len(final)>=7:
+                                                        list_activities.append(value["route7"][0]+" --> "+value["route7"][1]+" (" + value["operator"]+ ")") 
+                                                        transporte.append(value["route7"][0]+" to "+value["route7"][1]) 
                                                         ids_activities.append(value["_id"])
-                                                        if len(final)>=10:
-                                                            list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
-                                                            transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                        if len(final)>=8:
+                                                            list_activities.append(value["route8"][0]+" --> "+value["route8"][1]+" (" + value["operator"]+ ")") 
+                                                            transporte.append(value["route8"][0]+" to "+value["route8"][1]) 
                                                             ids_activities.append(value["_id"])
-            
+                                                            if len(final)>=9:
+                                                                list_activities.append(value["route9"][0]+" --> "+value["route9"][1]+" (" + value["operator"]+ ")") 
+                                                                transporte.append(value["route9"][0]+" to "+value["route9"][1]) 
+                                                                ids_activities.append(value["_id"])
+                                                                if len(final)>=10:
+                                                                    list_activities.append(value["route10"][0]+" --> "+value["route10"][1]+" (" + value["operator"]+ ")") 
+                                                                    transporte.append(value["route10"][0]+" to "+value["route10"][1]) 
+                                                                    ids_activities.append(value["_id"])
+                            break
                 #! Nueva forma de hacer
                 
                 #! Fin
@@ -5011,8 +5111,20 @@ if menu_sidebar=="Crear programa":
 
                         st.subheader("Activities & Transport")
                         from streamlit_sortables import sort_items
-
+                        
+                        #? Crear una funcion para que aumente un valor al final de cada actividad, esto para evitar errores en uso de sort_items
+                        def add_number_to_activities(list_activities):
+                            final=[]
+                            for i in list_activities:
+                                final.append(i+"(" +index+")")
+                            return final
+                        list_activities = add_number_to_activities(list_activities)
                         original_items = list_activities
+
+                        if default_value != None:
+                            default_value = add_number_to_activities(default_value)
+                        
+
                         # sorted_items = sort_items(original_items)
 
                         # st.write(f'original_items: {original_items}')
@@ -5107,13 +5219,16 @@ if menu_sidebar=="Crear programa":
 
                 return elegir_actividad
             
+            # Inicio para las actividades
             cantidad_dias = len(st.session_state.days_places_base_program)
-            
+            if "copia_days_places_base_program" not in st.session_state:
+                st.session_state.copia_days_places_base_program = []
 
             # Inicializar variables para guardar data
             if "contador_act_trans" not in st.session_state:
                 st.session_state.contador_act_trans = 1
-            
+            if "data_act_trans_completa" not in st.session_state:
+                st.session_state.data_act_trans_completa = []
 
             if "data_boom_1" not in st.session_state:
                 st.session_state.data_boom_1 = None
@@ -5216,48 +5331,89 @@ if menu_sidebar=="Crear programa":
             if "data_boom_50" not in st.session_state:
                 st.session_state.data_boom_50 = None
 
+            def eliminar_numeros_finales(dia_datos):
+                final=[]
+                for i in dia_datos:
+                    i = i[:-4]
+                    final.append(i)
+                return final
+            
+            # sirve  para aumentar los lugares de un save anterior
+            def recordar_datos():
+                contador = 0
+                for x in st.session_state.days_places_base_program:
+                    contador+=1
+                    copia_days = st.session_state.copia_days_places_base_program.copy()
+                    if x in copia_days:
+                        
+                        number = copia_days.index(x)
+                        st.session_state["data_boom_"+str(contador)] = st.session_state.data_act_trans_completa[number]
+                        copia_days[number] = "No"
+                    else:
+                        st.session_state["data_boom_"+str(contador)] = None
+                
+            
+
+            if st.session_state.contador_act_trans != 1 :
+                
+                if st.session_state.comida == 0:
+                    recordar_datos()
+                st.session_state.comida +=1
+
 
             if cantidad_dias >= 1:
                 lugares = ""
                 for  lugar in st.session_state.days_places_base_program[0]:
                     lugares+=lugar+" - "
                 lugares = lugares[:-3]
-                st.markdown("## DAY 1"+" - "+str(lugares))
+                col1, col2 =st.columns((4,1))
+                col1.markdown("## DAY 1"+" - "+str(lugares))
+                
+                    
                 if st.session_state.contador_act_trans == 1:
-                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0))
-                    st.session_state.data_boom_1 = data_1
+                    
+                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], "01")
+                    st.session_state.data_boom_1 = eliminar_numeros_finales(data_1)
+                    
                     
                 elif st.session_state.contador_act_trans != 1 :
-                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], str(0), st.session_state.data_boom_1)
-                    st.session_state.data_boom_1 = data_1
-                
+                        
+                    data_1 = activities_and_transport_program(st.session_state.days_places_base_program[0], "01", st.session_state.data_boom_1)
+                    st.session_state.data_boom_1 = eliminar_numeros_finales(data_1)
+
                 if cantidad_dias >= 2:
                     lugares = ""
                     for  lugar in st.session_state.days_places_base_program[1]:
                         lugares+=lugar+" - "
                     lugares = lugares[:-3]
                     st.markdown("## DAY 2"+" - "+str(lugares))
-                    if st.session_state.contador_act_trans ==1:
-                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1))
-                        st.session_state.data_boom_2 = data_2
-                        
-                    elif st.session_state.contador_act_trans != 1:
-                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], str(1), st.session_state.data_boom_2)
-                        st.session_state.data_boom_2 = data_2
                     
-                    if cantidad_dias >= 3:  
+                    if st.session_state.contador_act_trans == 1:
+                        
+                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], "02")
+                        st.session_state.data_boom_2 = eliminar_numeros_finales(data_2)
+                        
+                    elif st.session_state.contador_act_trans != 1 :
+                            
+                        data_2 = activities_and_transport_program(st.session_state.days_places_base_program[1], "02", st.session_state.data_boom_2)
+                        st.session_state.data_boom_2 = eliminar_numeros_finales(data_2)
+
+                    if cantidad_dias >= 3:
                         lugares = ""
                         for  lugar in st.session_state.days_places_base_program[2]:
                             lugares+=lugar+" - "
                         lugares = lugares[:-3]
                         st.markdown("## DAY 3"+" - "+str(lugares))
-                        if st.session_state.contador_act_trans ==1:
-                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2))
-                            st.session_state.data_boom_3 = data_3
+                        
+                        if st.session_state.contador_act_trans == 1:
                             
-                        elif st.session_state.contador_act_trans != 1:
-                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], str(2), st.session_state.data_boom_3)
-                            st.session_state.data_boom_3 = data_3
+                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], "03")
+                            st.session_state.data_boom_3 = eliminar_numeros_finales(data_3)
+                            
+                        elif st.session_state.contador_act_trans != 1 :
+                                
+                            data_3 = activities_and_transport_program(st.session_state.days_places_base_program[2], "03", st.session_state.data_boom_3)
+                            st.session_state.data_boom_3 = eliminar_numeros_finales(data_3)
                         
                         if cantidad_dias >= 4:
                             lugares = ""
@@ -5265,13 +5421,16 @@ if menu_sidebar=="Crear programa":
                                 lugares+=lugar+" - "
                             lugares = lugares[:-3]
                             st.markdown("## DAY 4"+" - "+str(lugares))
-                            if st.session_state.contador_act_trans ==1:
-                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3))
-                                st.session_state.data_boom_4 = data_4
+                            
+                            if st.session_state.contador_act_trans == 1:
                                 
-                            elif st.session_state.contador_act_trans != 1:
-                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], str(3), st.session_state.data_boom_4)
-                                st.session_state.data_boom_4 = data_4
+                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], "04")
+                                st.session_state.data_boom_4 = eliminar_numeros_finales(data_4)
+                                
+                            elif st.session_state.contador_act_trans != 1 :
+                                    
+                                data_4 = activities_and_transport_program(st.session_state.days_places_base_program[3], "04", st.session_state.data_boom_4)
+                                st.session_state.data_boom_4 = eliminar_numeros_finales(data_4)
                             
                             if cantidad_dias >= 5:
                                 lugares = ""
@@ -5279,134 +5438,31 @@ if menu_sidebar=="Crear programa":
                                     lugares+=lugar+" - "
                                 lugares = lugares[:-3]
                                 st.markdown("## DAY 5"+" - "+str(lugares))
-                                if st.session_state.contador_act_trans ==1:
-                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4))
-                                    st.session_state.data_boom_5 = data_5
-                                elif st.session_state.contador_act_trans != 1:
-                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], str(4), st.session_state.data_boom_5)
-                                    st.session_state.data_boom_5 = data_5
                                 
-                                if cantidad_dias >= 6:
-                                    lugares = ""
-                                    for  lugar in st.session_state.days_places_base_program[5]:
-                                        lugares+=lugar+" - "
-                                    lugares = lugares[:-3]
-                                    st.markdown("## DAY 6"+" - "+str(lugares))
-                                    if st.session_state.contador_act_trans ==1:
-                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5))
-                                        st.session_state.data_boom_6 = data_6
-                                    elif st.session_state.contador_act_trans != 1:
-                                        data_6 = activities_and_transport_program(st.session_state.days_places_base_program[5], str(5), st.session_state.data_boom_6)
-                                        st.session_state.data_boom_6 = data_6
+                                if st.session_state.contador_act_trans == 1:
                                     
-                                    if cantidad_dias >= 7:
-                                        lugares = ""
-                                        for  lugar in st.session_state.days_places_base_program[6]:
-                                            lugares+=lugar+" - "
-                                        lugares = lugares[:-3]
-                                        st.markdown("## DAY 7"+" - "+str(lugares))
-                                        if st.session_state.contador_act_trans ==1:
-                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6))
-                                            st.session_state.data_boom_7 = data_7
-                                        elif st.session_state.contador_act_trans != 1:
-                                            data_7 = activities_and_transport_program(st.session_state.days_places_base_program[6], str(6), st.session_state.data_boom_7)
-                                            st.session_state.data_boom_7 = data_7
+                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], "05")
+                                    st.session_state.data_boom_5 = eliminar_numeros_finales(data_5)
+                                    
+                                elif st.session_state.contador_act_trans != 1 :
                                         
-                                        if cantidad_dias >= 8:
-                                            lugares = ""
-                                            for  lugar in st.session_state.days_places_base_program[7]:
-                                                lugares+=lugar+" - "
-                                            lugares = lugares[:-3]
-                                            st.markdown("## DAY 8"+" - "+str(lugares))
-                                            if st.session_state.contador_act_trans ==1:
-                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7))
-                                                st.session_state.data_boom_8 = data_8
-                                            elif st.session_state.contador_act_trans != 1:
-                                                data_8 = activities_and_transport_program(st.session_state.days_places_base_program[7], str(7), st.session_state.data_boom_8)
-                                                st.session_state.data_boom_8 = data_8
-                                            
-                                            if cantidad_dias >= 9:
-                                                lugares = ""
-                                                for  lugar in st.session_state.days_places_base_program[8]:
-                                                    lugares+=lugar+" - "
-                                                lugares = lugares[:-3]
-                                                st.markdown("## DAY 9"+" - "+str(lugares))
-                                                if st.session_state.contador_act_trans ==1:
-                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8))
-                                                    st.session_state.data_boom_9 = data_9
-                                                elif st.session_state.contador_act_trans != 1:
-                                                    data_9 = activities_and_transport_program(st.session_state.days_places_base_program[8], str(8), st.session_state.data_boom_9)
-                                                    st.session_state.data_boom_9 = data_9
-                                                
-                                                if cantidad_dias >= 10:
-                                                    lugares = ""
-                                                    for  lugar in st.session_state.days_places_base_program[9]:
-                                                        lugares+=lugar+" - "
-                                                    lugares = lugares[:-3]
-                                                    st.markdown("## DAY 10"+" - "+str(lugares))
-                                                    if st.session_state.contador_act_trans ==1:
-                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9))
-                                                        st.session_state.data_boom_10 = data_10
-                                                    elif st.session_state.contador_act_trans != 1:
-                                                        data_10 = activities_and_transport_program(st.session_state.days_places_base_program[9], str(9), st.session_state.data_boom_10)
-                                                        st.session_state.data_boom_10 = data_10
-                                                    
-                                                    if cantidad_dias >= 11:
-                                                        lugares = ""
-                                                        for  lugar in st.session_state.days_places_base_program[10]:
-                                                            lugares+=lugar+" - "
-                                                        lugares = lugares[:-3]
-                                                        st.markdown("## DAY 11"+" - "+str(lugares))
-                                                        if st.session_state.contador_act_trans ==1:
-                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10))
-                                                            st.session_state.data_boom_11 = data_11
-                                                        elif st.session_state.contador_act_trans != 1:
-                                                            data_11 = activities_and_transport_program(st.session_state.days_places_base_program[10], str(10), st.session_state.data_boom_11)
-                                                            st.session_state.data_boom_11 = data_11
-                                                        
-                                                        if cantidad_dias >= 12:
-                                                            lugares = ""
-                                                            for  lugar in st.session_state.days_places_base_program[11]:
-                                                                lugares+=lugar+" - "
-                                                            lugares = lugares[:-3]
-                                                            st.markdown("## DAY 12"+" - "+str(lugares))
-                                                            if st.session_state.contador_act_trans ==1:
-                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11))
-                                                                st.session_state.data_boom_12 = data_12
-                                                            elif st.session_state.contador_act_trans != 1:
-                                                                data_12 = activities_and_transport_program(st.session_state.days_places_base_program[11], str(11), st.session_state.data_boom_12)
-                                                                st.session_state.data_boom_12 = data_12
-                                                            
-                                                            if cantidad_dias >= 13:
-                                                                lugares = ""
-                                                                for  lugar in st.session_state.days_places_base_program[12]:
-                                                                    lugares+=lugar+" - "
-                                                                lugares = lugares[:-3]
-                                                                st.markdown("## DAY 13"+" - "+str(lugares))
-                                                                if st.session_state.contador_act_trans ==1:
-                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12))
-                                                                    st.session_state.data_boom_13 = data_13
-                                                                elif st.session_state.contador_act_trans != 1:
-                                                                    data_13 = activities_and_transport_program(st.session_state.days_places_base_program[12], str(12), st.session_state.data_boom_13)
-                                                                    st.session_state.data_boom_13 = data_13
-                                                                
-                                                                if cantidad_dias >= 14:
-                                                                    lugares = ""
-                                                                    for  lugar in st.session_state.days_places_base_program[13]:
-                                                                        lugares+=lugar+" - "
-                                                                    lugares = lugares[:-3]
-                                                                    st.markdown("## DAY 14"+" - "+str(lugares))
-                                                                    if st.session_state.contador_act_trans ==1:
-                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13))
-                                                                        st.session_state.data_boom_14 = data_14
-                                                                    elif st.session_state.contador_act_trans != 1:
-                                                                        data_14 = activities_and_transport_program(st.session_state.days_places_base_program[13], str(13), st.session_state.data_boom_14)
-                                                                        st.session_state.data_boom_14 = data_14
+                                    data_5 = activities_and_transport_program(st.session_state.days_places_base_program[4], "05", st.session_state.data_boom_5)
+                                    st.session_state.data_boom_5 = eliminar_numeros_finales(data_5)
 
-        
-            if st.button("Save"):
-                st.session_state.contador_act_trans +=1
-                st.info("Saved")
+            st.session_state.data_act_trans_completa = [st.session_state.data_boom_1, st.session_state.data_boom_2, st.session_state.data_boom_3, st.session_state.data_boom_4, st.session_state.data_boom_5,
+                                                            st.session_state.data_boom_6, st.session_state.data_boom_7, st.session_state.data_boom_8, st.session_state.data_boom_9, st.session_state.data_boom_10,
+                                                            st.session_state.data_boom_11, st.session_state.data_boom_12, st.session_state.data_boom_13, st.session_state.data_boom_14, st.session_state.data_boom_15,
+                                                            st.session_state.data_boom_16, st.session_state.data_boom_17, st.session_state.data_boom_18, st.session_state.data_boom_19, st.session_state.data_boom_20,
+                                                            st.session_state.data_boom_21, st.session_state.data_boom_22, st.session_state.data_boom_23, st.session_state.data_boom_24, st.session_state.data_boom_25,
+                                                            st.session_state.data_boom_26, st.session_state.data_boom_27, st.session_state.data_boom_28, st.session_state.data_boom_29, st.session_state.data_boom_30,
+                                                            st.session_state.data_boom_31, st.session_state.data_boom_32, st.session_state.data_boom_33, st.session_state.data_boom_34, st.session_state.data_boom_35,
+                                                            st.session_state.data_boom_36, st.session_state.data_boom_37, st.session_state.data_boom_38, st.session_state.data_boom_39, st.session_state.data_boom_40,
+                                                            st.session_state.data_boom_41, st.session_state.data_boom_42, st.session_state.data_boom_43, st.session_state.data_boom_44, st.session_state.data_boom_45,
+                                                            st.session_state.data_boom_46, st.session_state.data_boom_47, st.session_state.data_boom_48, st.session_state.data_boom_49, st.session_state.data_boom_50
+                                                            ]
+            st.session_state.contador_act_trans +=1
+            st.session_state.copia_days_places_base_program = st.session_state.days_places_base_program
+
         except:
             st.write("")
     st.markdown("##")
